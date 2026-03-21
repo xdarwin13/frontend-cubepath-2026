@@ -282,14 +282,20 @@ export default function LandingPage() {
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-0.5 group">
             <motion.div 
               whileHover={{ rotate: 15, scale: 1.1 }} 
               transition={{ type: "spring", stiffness: 300 }}
               className="relative"
             >
-              <BookOpen className="h-7 w-7 text-[#38bdf8]" />
-              <div className="absolute inset-0 bg-[#38bdf8] blur-lg opacity-30 group-hover:opacity-60 transition-opacity" />
+              <NextImage
+                src="/logo.png"
+                alt="Logo EduCubeIA"
+                width={52}
+                height={52}
+                className="h-12 w-12 object-contain scale-125 -mr-2"
+                priority
+              />
             </motion.div>
             <span className="text-xl font-bold tracking-tight gradient-text">EduCubeIA</span>
           </Link>
