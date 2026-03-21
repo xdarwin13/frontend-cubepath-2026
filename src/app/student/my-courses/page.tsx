@@ -31,7 +31,7 @@ export default function MyCoursesPage() {
   return (
     <DashboardLayout allowedRole="student">
       <div className="animate-fade-in">
-        <h1 className="text-3xl font-bold mb-2">Mis Cursos</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Mis Cursos</h1>
         <p className="text-slate-400 mb-8">Cursos en los que estas inscrito</p>
 
         {loading ? (

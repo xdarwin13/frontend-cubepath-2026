@@ -34,17 +34,17 @@ export default function AdminUsersPage() {
   return (
     <DashboardLayout allowedRole="admin">
       <div className="animate-fade-in">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Usuarios</h1>
-            <p className="text-slate-400 mt-1">Gestion de usuarios de la plataforma</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Usuarios</h1>
+            <p className="text-slate-400 mt-1 text-sm sm:text-base">Gestion de usuarios de la plataforma</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {['', 'teacher', 'student', 'admin'].map(role => (
               <button
                 key={role}
                 onClick={() => { setRoleFilter(role); setLoading(true); }}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-all ${roleFilter === role ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm transition-all ${roleFilter === role ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
               >
                 {role === '' ? 'Todos' : role === 'teacher' ? 'Profesores' : role === 'student' ? 'Estudiantes' : 'Admins'}
               </button>
@@ -55,8 +55,8 @@ export default function AdminUsersPage() {
         {loading ? (
           <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blue-400" /></div>
         ) : (
-          <div className="glass rounded-xl overflow-hidden">
-            <table className="w-full">
+          <div className="glass rounded-xl overflow-hidden overflow-x-auto">
+            <table className="w-full min-w-[580px]">
               <thead>
                 <tr className="border-b border-slate-700/50">
                   <th className="text-left p-4 text-xs font-medium text-slate-400 uppercase">Usuario</th>

@@ -56,7 +56,7 @@ export default function TeacherDashboard() {
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4"
         >
           <div>
-            <h1 className="text-3xl font-bold">Mis Cursos</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Mis Cursos</h1>
             <p className="text-slate-400 mt-1">Gestiona y crea cursos con IA</p>
           </div>
           <Link href="/teacher/create">
@@ -72,7 +72,7 @@ export default function TeacherDashboard() {
         </motion.div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
           {statCards.map((card, i) => (
             <motion.div
               key={i}

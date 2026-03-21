@@ -122,12 +122,12 @@ export default function AdminDashboard() {
     <DashboardLayout allowedRole="admin">
       <div>
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-3xl font-bold mb-1">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>
           <p className="text-slate-400 mb-8">Overview de la plataforma <span className="gradient-text font-semibold">EduCubeIA</span></p>
         </motion.div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
           {statCards.map((card, i) => (
             <motion.div
               key={i}
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Charts */}
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-xl p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-[#38bdf8]" /> Registros por Día</h3>
             {charts?.registrationsPerDay?.length > 0 ? (

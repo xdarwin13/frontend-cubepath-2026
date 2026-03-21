@@ -133,8 +133,8 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar - Course Structure */}
-          <div className="lg:w-80 flex-shrink-0">
-            <div className="glass rounded-xl p-4 sticky top-8">
+          <div className="w-full lg:w-80 flex-shrink-0 order-first">
+            <div className="glass rounded-xl p-4 lg:sticky lg:top-8">
               <div className="mb-4">
                 <h2 className="font-bold text-lg">{course.title}</h2>
                 <p className="text-xs text-slate-400 mt-1">{course.teacher?.name}</p>
@@ -194,10 +194,10 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
           <div className="flex-1 min-w-0">
             {activeLesson ? (
               <div>
-                <div className="glass rounded-xl p-8">
-                  <h2 className="text-2xl font-bold mb-4">{activeLesson.title}</h2>
+                <div className="glass rounded-xl p-4 sm:p-6 lg:p-8">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-4">{activeLesson.title}</h2>
                   {activeLesson.imageUrl && (
-                    <img src={activeLesson.imageUrl} alt="" className="w-full h-64 object-cover rounded-xl mb-6" />
+                    <img src={activeLesson.imageUrl} alt="" className="w-full h-48 sm:h-64 object-cover rounded-xl mb-6" />
                   )}
                   {activeLesson.audioUrl && (
                     <div className="mb-6 glass rounded-xl p-4">
@@ -213,11 +213,11 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
                 </div>
 
                 {/* Lesson Navigation */}
-                <div className="flex items-center justify-between mt-6 gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-6 gap-3 sm:gap-4">
                   {prevLesson ? (
                     <button
                       onClick={() => navigateToLesson(prevLesson)}
-                      className="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-700 text-slate-300 hover:border-blue-500/30 hover:text-white hover:bg-slate-800/50 transition-all flex-1 max-w-xs"
+                      className="flex items-center gap-2 px-4 sm:px-5 py-3 rounded-xl border border-slate-700 text-slate-300 hover:border-blue-500/30 hover:text-white hover:bg-slate-800/50 transition-all flex-1 sm:max-w-xs"
                     >
                       <ChevronLeft className="w-4 h-4 flex-shrink-0" />
                       <div className="text-left min-w-0">
@@ -231,7 +231,7 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
                   {nextLesson ? (
                     <button
                       onClick={() => navigateToLesson(nextLesson)}
-                      className="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-700 text-slate-300 hover:border-blue-500/30 hover:text-white hover:bg-slate-800/50 transition-all flex-1 max-w-xs text-right"
+                      className="flex items-center gap-2 px-4 sm:px-5 py-3 rounded-xl border border-slate-700 text-slate-300 hover:border-blue-500/30 hover:text-white hover:bg-slate-800/50 transition-all flex-1 sm:max-w-xs text-right"
                     >
                       <div className="text-right min-w-0 flex-1">
                         <div className="text-xs text-slate-500">Siguiente</div>

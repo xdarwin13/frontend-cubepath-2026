@@ -30,14 +30,14 @@ export default function AdminCoursesPage() {
   return (
     <DashboardLayout allowedRole="admin">
       <div className="animate-fade-in">
-        <h1 className="text-3xl font-bold mb-2">Cursos</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Cursos</h1>
         <p className="text-slate-400 mb-8">Todos los cursos de la plataforma</p>
 
         {loading ? (
           <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blue-400" /></div>
         ) : (
-          <div className="glass rounded-xl overflow-hidden">
-            <table className="w-full">
+          <div className="glass rounded-xl overflow-hidden overflow-x-auto">
+            <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="border-b border-slate-700/50">
                   <th className="text-left p-4 text-xs font-medium text-slate-400 uppercase">Curso</th>

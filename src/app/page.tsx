@@ -18,6 +18,8 @@ import {
   Zap,
   Globe,
   ChevronRight,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -247,6 +249,7 @@ export default function LandingPage() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
   const navBg = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
   const [navSolid, setNavSolid] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navBg.on('change', (v) => setNavSolid(v > 0.5));
@@ -277,8 +280,8 @@ export default function LandingPage() {
 
       {/* Navbar */}
       <motion.nav
-        className={`fixed top-0 left-0 right-0 px-6 py-4 z-50 transition-all duration-500 ${
-          navSolid ? 'bg-[#050a18]/90 backdrop-blur-xl border-b border-slate-800/50 shadow-lg shadow-black/20' : ''
+        className={`fixed top-0 left-0 right-0 px-4 sm:px-6 py-4 z-50 transition-all duration-500 ${
+          navSolid || mobileMenuOpen ? 'bg-[#050a18]/90 backdrop-blur-xl border-b border-slate-800/50 shadow-lg shadow-black/20' : ''
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between">
@@ -309,20 +312,56 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <Link href={getDashboardLink()}>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="text-sm font-semibold text-[#38bdf8] px-5 py-2.5 rounded-full border border-[#38bdf8]/30 hover:bg-[#38bdf8]/10 transition-all flex items-center gap-2"
+          <div className="flex items-center gap-3">
+            <Link href={getDashboardLink()} className="hidden sm:block">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="text-sm font-semibold text-[#38bdf8] px-5 py-2.5 rounded-full border border-[#38bdf8]/30 hover:bg-[#38bdf8]/10 transition-all flex items-center gap-2"
+              >
+                {user ? 'Mi Dashboard' : 'Iniciar Sesión'}
+                <ArrowRight className="w-4 h-4" />
+              </motion.div>
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-xl text-slate-400 hover:text-white transition-colors"
             >
-              {user ? 'Mi Dashboard' : 'Iniciar Sesión'}
-              <ArrowRight className="w-4 h-4" />
-            </motion.div>
-          </Link>
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:hidden px-6 pb-4 pt-2 border-t border-slate-800/50"
+          >
+            <div className="flex flex-col gap-3">
+              {['Características', 'Cómo Funciona', 'Perfiles'].map((item, i) => (
+                <a
+                  key={i}
+                  href={`#${['features', 'how-it-works', 'roles'][i]}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-medium text-slate-400 hover:text-white transition-colors py-2"
+                >
+                  {item}
+                </a>
+              ))}
+              <Link href={getDashboardLink()} onClick={() => setMobileMenuOpen(false)} className="sm:hidden">
+                <div className="text-sm font-semibold text-[#38bdf8] px-5 py-2.5 rounded-full border border-[#38bdf8]/30 hover:bg-[#38bdf8]/10 transition-all flex items-center justify-center gap-2 w-full">
+                  {user ? 'Mi Dashboard' : 'Iniciar Sesión'}
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </Link>
+            </div>
+          </motion.div>
+        )}
       </motion.nav>
 
-      <main className="mx-auto max-w-7xl px-6 relative z-10">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10">
         {/* ========== HERO SECTION ========== */}
         <motion.section
           style={{ y: heroY, opacity: heroOpacity }}
@@ -344,7 +383,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.05]"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.05]"
             >
               Cursos creados
               <br />
@@ -367,13 +406,13 @@ export default function LandingPage() {
               className="flex flex-wrap items-center gap-4"
             >
               <Link href="/register?role=teacher">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-gradient-glow h-14 min-w-[220px] text-lg px-8 py-4 flex items-center justify-center gap-2 leading-none">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-gradient-glow h-12 sm:h-14 min-w-[180px] sm:min-w-[220px] text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 flex items-center justify-center gap-2 leading-none">
                   <GraduationCap className="w-5 h-5 shrink-0" />
                   Soy Profesor
                 </motion.div>
               </Link>
               <Link href="/register?role=student">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="h-14 min-w-[220px] px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-semibold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2 leading-none">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="h-12 sm:h-14 min-w-[180px] sm:min-w-[220px] px-6 sm:px-8 py-3 sm:py-4 rounded-full bg-white/5 border border-white/10 text-white font-semibold text-base sm:text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2 leading-none">
                   <BookOpen className="w-5 h-5 shrink-0" />
                   Soy Estudiante
                 </motion.div>
@@ -385,18 +424,18 @@ export default function LandingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2, duration: 0.6 }}
-              className="flex items-center gap-6 mt-12 text-slate-500 text-sm"
+              className="flex flex-wrap items-center gap-3 sm:gap-6 mt-12 text-slate-500 text-sm"
             >
               <div className="flex items-center gap-2">
                 <Globe className="w-4 h-4" />
                 <span>100% Gratuito</span>
               </div>
-              <div className="w-px h-4 bg-slate-700" />
+              <div className="hidden sm:block w-px h-4 bg-slate-700" />
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
                 <span>Seguro & Privado</span>
               </div>
-              <div className="w-px h-4 bg-slate-700" />
+              <div className="hidden sm:block w-px h-4 bg-slate-700" />
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4" />
                 <span>IA en Tiempo Real</span>
@@ -411,7 +450,7 @@ export default function LandingPage() {
             transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative flex justify-center lg:justify-end z-10 lg:-mr-24 xl:-mr-32 mt-12 lg:mt-0"
           >
-            <div className="relative w-[115%] sm:w-[125%] lg:w-[135%] max-w-[950px]">
+            <div className="relative w-full sm:w-[125%] lg:w-[135%] max-w-[950px]">
               {/* Animated glow rings */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] border border-[#38bdf8]/5 rounded-full" style={{ animation: 'spinSlow 20s linear infinite' }} />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] h-[75%] border border-[#818cf8]/5 rounded-full" style={{ animation: 'spinSlow 30s linear infinite reverse' }} />
@@ -520,7 +559,7 @@ export default function LandingPage() {
             <p className="text-slate-400 text-lg">Plataforma adaptada a tus necesidades educativas</p>
           </AnimatedSection>
 
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
             {/* Teacher */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -528,7 +567,7 @@ export default function LandingPage() {
               transition={{ duration: 0.6, delay: 0 }}
               viewport={{ once: true }}
               whileHover={{ y: -8 }}
-              className="glass-card p-10 text-center flex flex-col h-full"
+              className="glass-card p-8 sm:p-10 text-center flex flex-col h-full"
             >
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3b82f6]/10 to-[#818cf8]/10 border border-[#3b82f6]/20">
                 <GraduationCap className="h-10 w-10 text-[#38bdf8]" />
@@ -549,7 +588,7 @@ export default function LandingPage() {
               transition={{ duration: 0.6, delay: 0.15 }}
               viewport={{ once: true }}
               whileHover={{ y: -12 }}
-              className="glass-card !overflow-visible p-10 text-center relative flex flex-col h-full scale-105 border-[#38bdf8]/20 z-10"
+              className="glass-card !overflow-visible p-8 sm:p-10 text-center relative flex flex-col h-full md:scale-105 border-[#38bdf8]/20 z-10"
               style={{ boxShadow: '0 0 60px rgba(56,189,248,0.08), 0 20px 50px rgba(0,0,0,0.4)' }}
             >
               <div className="absolute top-0 inset-x-0 mx-auto -translate-y-1/2 w-max">
@@ -576,7 +615,7 @@ export default function LandingPage() {
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
               whileHover={{ y: -8 }}
-              className="glass-card p-10 text-center flex flex-col h-full"
+              className="glass-card p-8 sm:p-10 text-center flex flex-col h-full sm:col-span-2 md:col-span-1"
             >
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-700/20 to-slate-600/20 border border-slate-600/20">
                 <BarChart3 className="h-10 w-10 text-slate-400" />
@@ -598,7 +637,7 @@ export default function LandingPage() {
             <motion.div
               whileHover={{ scale: 1.01 }}
               transition={{ type: "spring", stiffness: 200 }}
-              className="mx-auto max-w-4xl text-center glass-card relative overflow-hidden p-12 lg:p-20 border-[#38bdf8]/10"
+              className="mx-auto max-w-4xl text-center glass-card relative overflow-hidden p-6 sm:p-12 lg:p-20 border-[#38bdf8]/10"
               style={{ boxShadow: '0 0 80px rgba(56,189,248,0.05)' }}
             >
               {/* Animated gradient bg */}
@@ -616,10 +655,10 @@ export default function LandingPage() {
                 <Sparkles className="w-8 h-8 text-[#38bdf8]" />
               </motion.div>
 
-              <h2 className="mb-6 text-4xl font-bold sm:text-5xl text-white relative z-10">
+              <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl text-white relative z-10">
                 Comienza a <span className="gradient-text-animated">Crear Hoy</span>
               </h2>
-              <p className="mb-10 text-xl text-slate-400 max-w-2xl mx-auto relative z-10">
+              <p className="mb-10 text-base sm:text-xl text-slate-400 max-w-2xl mx-auto relative z-10">
                 Únete a la nueva era de la educación asistida por inteligencia artificial y despliega cursos completos en minutos.
               </p>
               <Link href="/register" className="relative z-10">

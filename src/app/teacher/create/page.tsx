@@ -150,7 +150,7 @@ export default function CreateCoursePage() {
               className="space-y-6"
             >
               <div>
-                <h1 className="text-3xl font-bold mb-2">Crear Curso con <span className="gradient-text">IA</span></h1>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">Crear Curso con <span className="gradient-text">IA</span></h1>
                 <p className="text-slate-400">Describe el curso que quieres crear y la IA generará toda la estructura</p>
               </div>
 
@@ -214,14 +214,14 @@ export default function CreateCoursePage() {
               animate={{ opacity: 1, x: 0 }}
               className="space-y-6"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold mb-1">{course.title}</h1>
-                  <p className="text-slate-400">{course.description}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-1">{course.title}</h1>
+                  <p className="text-slate-400 text-sm sm:text-base">{course.description}</p>
                   <span className="text-xs text-[#38bdf8] mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#38bdf8]/5 border border-[#38bdf8]/10">{course.category}</span>
                 </div>
                 {course.coverImage && (
-                  <motion.img initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} src={course.coverImage} alt="" className="w-24 h-24 rounded-xl object-cover border border-slate-700/30" />
+                  <motion.img initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} src={course.coverImage} alt="" className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover border border-slate-700/30 shrink-0" />
                 )}
               </div>
 
@@ -324,7 +324,7 @@ export default function CreateCoursePage() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -339,7 +339,7 @@ export default function CreateCoursePage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push('/teacher')}
-                  className="btn-secondary px-6"
+                  className="btn-secondary px-6 py-3.5 text-center"
                 >
                   Guardar como Borrador
                 </motion.button>

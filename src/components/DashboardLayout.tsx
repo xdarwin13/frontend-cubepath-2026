@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, LogOut, Home, BarChart3, GraduationCap, Users, Sparkles, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -76,13 +77,25 @@ export default function DashboardLayout({ children, allowedRole }: { children: R
 
   return (
     <div className="min-h-screen flex bg-[#050a18]">
-      {/* Mobile menu toggle */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-xl glass border border-slate-700/50"
-      >
-        {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </button>
+      {/* Mobile top bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center gap-3 px-4 py-3 bg-[#050a18]/90 backdrop-blur-xl border-b border-slate-800/50">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="p-2 rounded-xl glass border border-slate-700/50"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <Link href="/" className="flex items-center gap-0.5">
+          <NextImage
+            src="/logo.png"
+            alt="Logo EduCubeIA"
+            width={40}
+            height={40}
+            className="h-9 w-9 object-contain scale-125"
+          />
+          <span className="text-base font-bold gradient-text">EduCubeIA</span>
+        </Link>
+      </div>
 
       {/* Sidebar overlay for mobile */}
       <AnimatePresence>
@@ -92,26 +105,39 @@ export default function DashboardLayout({ children, allowedRole }: { children: R
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
+            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
           />
         )}
       </AnimatePresence>
 
       {/* Sidebar */}
-      <aside className={`w-72 glass-strong fixed h-full flex flex-col z-40 transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        {/* Logo */}
+      <aside className={`w-72 glass-strong fixed h-full flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        {/* Logo + close button */}
         <div className="p-6">
-          <Link href="/" className="flex items-center gap-3 mb-8 group">
-            <motion.div
-              whileHover={{ rotate: 15, scale: 1.1 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3b82f6] to-[#06b6d4] flex items-center justify-center relative"
+          <div className="flex items-center justify-between mb-8">
+            <Link href="/" className="flex items-center gap-0.5 group">
+              <motion.div
+                whileHover={{ rotate: 15, scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="relative"
+              >
+                <NextImage
+                  src="/logo.png"
+                  alt="Logo EduCubeIA"
+                  width={52}
+                  height={52}
+                  className="h-12 w-12 object-contain scale-125 -mr-2"
+                />
+              </motion.div>
+              <span className="text-lg font-bold gradient-text">EduCubeIA</span>
+            </Link>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all"
             >
-              <BookOpen className="w-5 h-5 text-white" />
-              <div className="absolute inset-0 rounded-xl bg-[#38bdf8] opacity-0 group-hover:opacity-30 blur-lg transition-opacity" />
-            </motion.div>
-            <span className="text-lg font-bold gradient-text">EduCubeIA</span>
-          </Link>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
           {/* User card */}
           <motion.div
@@ -183,7 +209,7 @@ export default function DashboardLayout({ children, allowedRole }: { children: R
       </aside>
 
       {/* Main Content */}
-      <main className="lg:ml-72 flex-1 p-6 lg:p-8 min-h-screen">
+      <main className="lg:ml-72 flex-1 p-4 pt-[72px] sm:p-6 sm:pt-[72px] lg:p-8 lg:pt-8 min-h-screen">
         <motion.div
           key={pathname}
           initial={{ opacity: 0, y: 20 }}

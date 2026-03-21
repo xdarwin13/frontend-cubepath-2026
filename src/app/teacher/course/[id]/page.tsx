@@ -111,10 +111,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
           Volver a mis cursos
         </Link>
 
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-1">{course.title}</h1>
-            <p className="text-slate-400">{course.description}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1">{course.title}</h1>
+            <p className="text-slate-400 text-sm sm:text-base">{course.description}</p>
             <div className="flex items-center gap-3 mt-2">
               <span className="text-xs text-blue-400">{course.category}</span>
               <span className={`px-2 py-0.5 rounded-full text-xs ${course.status === 'published' ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'}`}>
@@ -123,7 +123,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
             </div>
           </div>
           {course.status !== 'published' && (
-            <button onClick={publishCourse} className="btn-primary flex items-center gap-2">
+            <button onClick={publishCourse} className="btn-primary flex items-center gap-2 shrink-0 self-start">
               <Eye className="w-4 h-4" /> Publicar
             </button>
           )}
@@ -145,12 +145,11 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
               {expandedModules.has(idx) && (
                 <div className="border-t border-slate-700/50 p-4 space-y-3">
                   {mod.lessons?.map((lesson: any, lIdx: number) => (
-                    <div key={lesson.id} className="flex items-start justify-between p-3 rounded-lg bg-slate-800/30">
-                      <div className="flex items-start gap-3 flex-1">
+                    <div key={lesson.id} className="flex flex-col sm:flex-row sm:items-start justify-between p-3 rounded-lg bg-slate-800/30 gap-3">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
                         <span className="text-xs text-slate-500 mt-1">{lIdx + 1}.</span>
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{lesson.title}</p>
-                          {/* Status indicators */}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate sm:whitespace-normal">{lesson.title}</p>
                           <div className="flex items-center gap-3 mt-1.5">
                             <span className={`inline-flex items-center gap-1 text-xs ${hasContent(lesson) ? 'text-emerald-400' : 'text-slate-500'}`}>
                               {hasContent(lesson) ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
@@ -163,7 +162,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-2 ml-3">
+                      <div className="flex gap-2 shrink-0 self-start">
                         <button
                           onClick={() => generateLessonContent(lesson.id)}
                           disabled={generatingContent.has(lesson.id)}

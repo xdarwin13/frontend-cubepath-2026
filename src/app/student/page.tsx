@@ -38,10 +38,10 @@ export default function StudentDashboard() {
   return (
     <DashboardLayout allowedRole="student">
       <div>
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Explorar Cursos</h1>
-            <p className="text-slate-400 mt-1">Descubre cursos creados con inteligencia artificial</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Explorar Cursos</h1>
+            <p className="text-slate-400 mt-1 text-sm sm:text-base">Descubre cursos creados con inteligencia artificial</p>
           </div>
         </motion.div>
 
