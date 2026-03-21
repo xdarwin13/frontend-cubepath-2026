@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EduCubeIA - Frontend
 
-## Getting Started
+El frontend de EduCubeIA es una aplicación educativa interactiva impulsada por IA. Fue desarrollada utilizando **Next.js (App Router)**, **TypeScript** y **Tailwind CSS**. Su propósito es ofrecer una plataforma moderna, fluida y con un diseño profesional (dark mode, glassmorphism) tanto para profesores (creadores de contenido) como para estudiantes (consumidores) y administradores.
 
-First, run the development server:
+## 🚀 Características Principales
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Dashboard por Roles**: Interfaz personalizada según el rol del usuario autenticado (Estudiante, Profesor o Administrador).
+2. **Creación de Cursos con IA**: Integración con el backend para solicitar a la IA la estructura, el texto de las lecciones, el audio TTS (Text-to-Speech) y las imágenes de portada generadas automáticamente.
+3. **Consumo de Contenido**: Un visor de lecciones avanzado con soporte de Markdown (`react-markdown`), seguimiento de progreso dinámico interactivo, e integrador de reproductor de audio.
+4. **Diseño UI/UX Responsivo**: Colores profesionales (Blue/Teal), efectos glass, y micro-animaciones pensados para dar la mejor experiencia visual.
+5. **Autenticación con JWT**: Manejo seguro del flujo de sesión a través de tokens almacenados localmente.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠 Instalación y Configuración Local
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Navega a la carpeta de la interfaz gráfica y asegúrate de tener [Node.js](https://nodejs.org/) instalado.
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. Crea una copia del archivo de ejemplo para tus variables de entorno locales:
+   ```bash
+   cp .env.example .env.local
+   ```
+3. Edita `.env.local` si necesitas cambiar la URL del backend (por defecto apunta a `http://localhost:4000/api`).
+4. Inicia el servidor de desarrollo en local:
+   ```bash
+   npm run dev
+   ```
+5. Accede a `http://localhost:3000` en tu navegador para ver la aplicación funcionando.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ⚙️ Variables de Entorno
 
-## Learn More
+Toda la configuración principal se define a través de variables de entorno. Puedes revisar el archivo `.env.example` para usarlos de base:
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Descripción | Valor por defecto |
+| --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | La URL de la API del backend que consumirá la aplicación. | `http://localhost:4000/api` |
+| `NEXT_PUBLIC_APP_NAME` | Nombre dinámico de la aplicación utilizado en algunos textos. | `EduCubeIA` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> **Nota:** Se utiliza `NEXT_PUBLIC_` en variables que necesitan ser accesadas por el navegador (ej: llamadas directas desde los componentes al backend). Mantén tus claves sensibles **fuera** de la configuración del entorno para el frontend.
