@@ -4,8 +4,10 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import NextImage from 'next/image';
 import { BookOpen, Mail, Lock, User, ArrowRight, Loader2, GraduationCap } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { REGISTRATION_DISABLED } from '@/lib/config';
 import toast from 'react-hot-toast';
 import RedirectIfAuthenticated from '@/components/RedirectIfAuthenticated';
 
@@ -23,6 +25,10 @@ function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (REGISTRATION_DISABLED) {
+      toast.error('El registro está temporalmente deshabilitado');
+      return;
+    }
     if (!role) {
       toast.error('Selecciona un rol');
       return;
@@ -41,6 +47,59 @@ function RegisterForm() {
     }
   };
 
+  if (REGISTRATION_DISABLED) {
+    return (
+      <div className="w-full max-w-md relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-8"
+        >
+          <Link href="/" className="inline-flex items-center gap-0.5 mb-6 transition hover:opacity-80 group">
+            <motion.div whileHover={{ rotate: 15 }} transition={{ type: "spring" }}>
+              <NextImage
+                src="/logo.png"
+                alt="Logo EduCubeIA"
+                width={48}
+                height={48}
+                className="h-11 w-11 object-contain scale-125 -mr-1.5"
+                priority
+              />
+            </motion.div>
+            <span className="text-3xl font-bold tracking-tight gradient-text">EduCubeIA</span>
+          </Link>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="glass-card rounded-2xl p-10 text-center"
+          style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(56,189,248,0.03)' }}
+        >
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#38bdf8]/10 border border-[#38bdf8]/20">
+            <Lock className="w-7 h-7 text-[#38bdf8]" />
+          </div>
+          <h1 className="text-2xl font-bold mb-3 text-white">Registro Cerrado</h1>
+          <p className="text-slate-400 mb-8 leading-relaxed">
+            El registro de nuevas cuentas se encuentra temporalmente deshabilitado para esta demostración.
+          </p>
+          <Link href="/login">
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="btn-gradient-glow w-full flex items-center justify-center gap-2 py-3.5 text-lg"
+            >
+              <ArrowRight className="w-5 h-5" />
+              Ir a Iniciar Sesión
+            </motion.div>
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md relative z-10">
       {/* Logo */}
@@ -50,9 +109,16 @@ function RegisterForm() {
         transition={{ duration: 0.6 }}
         className="text-center mb-8"
       >
-        <Link href="/" className="inline-flex items-center gap-2 mb-6 transition hover:opacity-80 group">
+        <Link href="/" className="inline-flex items-center gap-0.5 mb-6 transition hover:opacity-80 group">
           <motion.div whileHover={{ rotate: 15 }} transition={{ type: "spring" }}>
-            <BookOpen className="w-8 h-8 text-[#38bdf8]" />
+            <NextImage
+              src="/logo.png"
+              alt="Logo EduCubeIA"
+              width={48}
+              height={48}
+              className="h-11 w-11 object-contain scale-125 -mr-1.5"
+              priority
+            />
           </motion.div>
           <span className="text-3xl font-bold tracking-tight gradient-text">EduCubeIA</span>
         </Link>

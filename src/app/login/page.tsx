@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { BookOpen, Mail, Lock, ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import NextImage from 'next/image';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { REGISTRATION_DISABLED } from '@/lib/config';
 import { useAuth } from '@/lib/auth';
 import { authApi } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -59,9 +61,16 @@ export default function LoginPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <Link href="/" className="inline-flex items-center gap-2 mb-6 transition hover:opacity-80 group">
+          <Link href="/" className="inline-flex items-center gap-0.5 mb-6 transition hover:opacity-80 group">
             <motion.div whileHover={{ rotate: 15 }} transition={{ type: "spring" }}>
-              <BookOpen className="w-8 h-8 text-[#38bdf8]" />
+              <NextImage
+                src="/logo.png"
+                alt="Logo EduCubeIA"
+                width={48}
+                height={48}
+                className="h-11 w-11 object-contain scale-125 -mr-1.5"
+                priority
+              />
             </motion.div>
             <span className="text-3xl font-bold tracking-tight gradient-text">EduCubeIA</span>
           </Link>
@@ -122,15 +131,17 @@ export default function LoginPage() {
           </motion.div>
         </motion.form>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="text-center mt-6 text-slate-400"
-        >
-          ¿No tienes cuenta?{' '}
-          <Link href="/register" className="text-[#38bdf8] hover:text-cyan-300 font-medium transition-colors">Regístrate</Link>
-        </motion.p>
+        {!REGISTRATION_DISABLED && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="text-center mt-6 text-slate-400"
+          >
+            ¿No tienes cuenta?{' '}
+            <Link href="/register" className="text-[#38bdf8] hover:text-cyan-300 font-medium transition-colors">Regístrate</Link>
+          </motion.p>
+        )}
       </div>
     </div>
     </RedirectIfAuthenticated>

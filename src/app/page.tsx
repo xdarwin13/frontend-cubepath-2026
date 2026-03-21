@@ -22,6 +22,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { REGISTRATION_DISABLED } from '@/lib/config';
 
 /* ========== ANIMATED COUNTER ========== */
 function AnimatedCounter({ value, suffix = '' }: { value: string; suffix?: string }) {
@@ -440,13 +441,13 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.7 }}
               className="flex flex-wrap items-center gap-4"
             >
-              <Link href="/register?role=teacher">
+              <Link href={REGISTRATION_DISABLED ? '/login' : '/register?role=teacher'}>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-gradient-glow h-12 sm:h-14 min-w-[180px] sm:min-w-[220px] text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 flex items-center justify-center gap-2 leading-none">
                   <GraduationCap className="w-5 h-5 shrink-0" />
                   Soy Profesor
                 </motion.div>
               </Link>
-              <Link href="/register?role=student">
+              <Link href={REGISTRATION_DISABLED ? '/login' : '/register?role=student'}>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="h-12 sm:h-14 min-w-[180px] sm:min-w-[220px] px-6 sm:px-8 py-3 sm:py-4 rounded-full bg-white/5 border border-white/10 text-white font-semibold text-base sm:text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2 leading-none">
                   <BookOpen className="w-5 h-5 shrink-0" />
                   Soy Estudiante
@@ -609,7 +610,7 @@ export default function LandingPage() {
               </div>
               <h3 className="mb-2 text-2xl font-bold text-white">Profesor</h3>
               <p className="mb-8 text-sm text-slate-400 flex-grow">Arquitecto del conocimiento. Diseña y despliega cursos automáticos con IA generativa.</p>
-              <Link href="/register?role=teacher">
+              <Link href={REGISTRATION_DISABLED ? '/login' : '/register?role=teacher'}>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="w-full rounded-full border border-[#38bdf8]/30 bg-transparent px-6 py-3 font-semibold text-[#38bdf8] transition-all hover:bg-[#38bdf8]/10 hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]">
                   Acceso Profesor
                 </motion.div>
@@ -636,7 +637,7 @@ export default function LandingPage() {
               </div>
               <h3 className="mb-2 text-2xl font-bold text-white">Estudiante</h3>
               <p className="mb-8 text-sm text-slate-300 flex-grow">El nodo receptor. Aprende y consume conocimiento eficientemente con contenido generado por IA.</p>
-              <Link href="/register?role=student">
+              <Link href={REGISTRATION_DISABLED ? '/login' : '/register?role=student'}>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="w-full btn-gradient-glow flex items-center justify-center text-center">
                   Unirse como Estudiante
                 </motion.div>
@@ -696,7 +697,7 @@ export default function LandingPage() {
               <p className="mb-10 text-base sm:text-xl text-slate-400 max-w-2xl mx-auto relative z-10">
                 Únete a la nueva era de la educación asistida por inteligencia artificial y despliega cursos completos en minutos.
               </p>
-              <Link href="/register" className="relative z-10">
+              <Link href={REGISTRATION_DISABLED ? '/login' : '/register'} className="relative z-10">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
