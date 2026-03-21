@@ -358,17 +358,17 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.7 }}
-              className="flex flex-wrap gap-4"
+              className="flex flex-wrap items-center gap-4"
             >
               <Link href="/register?role=teacher">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-gradient-glow text-lg px-8 py-4 flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5" />
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-gradient-glow h-14 min-w-[220px] text-lg px-8 py-4 flex items-center justify-center gap-2 leading-none">
+                  <GraduationCap className="w-5 h-5 shrink-0" />
                   Soy Profesor
                 </motion.div>
               </Link>
               <Link href="/register?role=student">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-semibold text-lg hover:bg-white/10 transition-all flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="h-14 min-w-[220px] px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-semibold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2 leading-none">
+                  <BookOpen className="w-5 h-5 shrink-0" />
                   Soy Estudiante
                 </motion.div>
               </Link>
