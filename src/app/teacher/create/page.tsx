@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { aiApi, teacherApi } from '@/lib/api';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Sparkles, Loader2, BookOpen, ArrowRight, Eye, Check, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Loader2, BookOpen, ArrowRight, Eye, Check, ChevronDown, ChevronUp, CheckCircle, XCircle, Wand2, Volume2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function CreateCoursePage() {
@@ -92,188 +93,260 @@ export default function CreateCoursePage() {
   };
 
   const promptSuggestions = [
-    'Curso de Python para principiantes con ejercicios practicos',
-    'Introduccion al Machine Learning y sus aplicaciones',
-    'Fundamentos de diseno web moderno con HTML, CSS y JavaScript',
+    'Curso de Python para principiantes con ejercicios prácticos',
+    'Introducción al Machine Learning y sus aplicaciones',
+    'Fundamentos de diseño web moderno con HTML, CSS y JavaScript',
     'Marketing digital para emprendedores',
-    'Fotografia profesional: de basico a avanzado',
-    'Finanzas personales e inversion para principiantes',
+    'Fotografía profesional: de básico a avanzado',
+    'Finanzas personales e inversión para principiantes',
+  ];
+
+  const stepItems = [
+    { num: 1, label: 'Prompt', icon: Wand2 },
+    { num: 2, label: 'Preview', icon: Eye },
+    { num: 3, label: 'Contenido', icon: BookOpen },
   ];
 
   return (
     <DashboardLayout allowedRole="teacher">
-      <div className="max-w-4xl mx-auto animate-fade-in">
-        {/* Steps */}
-        <div className="flex items-center gap-4 mb-8">
-          {[
-            { num: 1, label: 'Prompt' },
-            { num: 2, label: 'Preview' },
-            { num: 3, label: 'Contenido' },
-          ].map((s, i) => (
-            <div key={s.num} className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                step >= s.num ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400'
-              }`}>
-                {step > s.num ? <Check className="w-4 h-4" /> : s.num}
+      <div className="max-w-4xl mx-auto">
+        {/* Steps indicator */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-center gap-3 mb-8">
+          {stepItems.map((s, i) => (
+            <div key={s.num} className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
+                <motion.div
+                  animate={{ scale: step === s.num ? 1.06 : 1 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-colors ${
+                    step >= s.num
+                      ? 'bg-gradient-to-br from-[#3b82f6] to-[#6366f1] text-white'
+                      : 'bg-slate-800/50 text-slate-500 border border-slate-700/50'
+                  }`}
+                >
+                  {step > s.num ? <Check className="w-4 h-4" /> : <s.icon className="w-4 h-4" />}
+                </motion.div>
+                <span className={`text-sm hidden sm:block whitespace-nowrap ${step >= s.num ? 'text-white font-medium' : 'text-slate-500'}`}>{s.label}</span>
               </div>
-              <span className={`text-sm ${step >= s.num ? 'text-white' : 'text-slate-500'}`}>{s.label}</span>
-              {i < 2 && <div className={`w-12 h-0.5 ${step > s.num ? 'bg-blue-600' : 'bg-slate-700'}`} />}
-            </div>
-          ))}
-        </div>
-
-        {/* Step 1: Prompt */}
-        {step === 1 && (
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Crear Curso con IA</h1>
-              <p className="text-slate-400">Describe el curso que quieres crear y la IA generara toda la estructura</p>
-            </div>
-
-            <div className="glass rounded-2xl p-6 space-y-4">
-              <label className="block text-sm font-medium text-slate-300">Describe tu curso</label>
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="input-field min-h-[120px] resize-none"
-                placeholder="Ej: Quiero un curso de desarrollo web moderno que cubra HTML5, CSS3, JavaScript ES6+, React y Node.js. Orientado a principiantes con ejercicios practicos en cada leccion."
-              />
-
-              <div>
-                <p className="text-xs text-slate-500 mb-2">Sugerencias:</p>
-                <div className="flex flex-wrap gap-2">
-                  {promptSuggestions.map((s, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setPrompt(s)}
-                      className="text-xs px-3 py-1.5 rounded-full border border-slate-700 text-slate-400 hover:border-blue-500 hover:text-blue-400 transition-all"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={handleGenerate}
-                disabled={generating || !prompt.trim()}
-                className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {generating ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Generando curso con IA...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Generar Curso
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Preview & Generate Content */}
-        {step >= 2 && course && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold mb-1">{course.title}</h1>
-                <p className="text-slate-400">{course.description}</p>
-                <span className="text-xs text-blue-400 mt-1 inline-block">{course.category}</span>
-              </div>
-              {course.coverImage && (
-                <img src={course.coverImage} alt="" className="w-24 h-24 rounded-xl object-cover" />
+              {i < stepItems.length - 1 && (
+                <div
+                  className={`h-0.5 w-10 sm:w-20 rounded-full transition-colors ${
+                    step > s.num ? 'bg-gradient-to-r from-[#3b82f6] to-[#6366f1]' : 'bg-slate-800'
+                  }`}
+                />
               )}
             </div>
+          ))}
+        </motion.div>
 
-            {/* Modules */}
-            <div className="space-y-3">
-              {course.modules?.map((mod: any, idx: number) => (
-                <div key={mod.id} className="glass rounded-xl overflow-hidden">
-                  <button
-                    onClick={() => toggleModule(idx)}
-                    className="w-full flex items-center justify-between p-4 hover:bg-slate-800/30 transition-colors"
+        {/* Step 1: Prompt */}
+        <AnimatePresence mode="wait">
+          {step === 1 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              className="space-y-6"
+            >
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Crear Curso con <span className="gradient-text">IA</span></h1>
+                <p className="text-slate-400">Describe el curso que quieres crear y la IA generará toda la estructura</p>
+              </div>
+
+              <div className="glass-card rounded-2xl p-6 space-y-4">
+                <label className="block text-sm font-medium text-slate-300">Describe tu curso</label>
+                <textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="input-field min-h-[120px] resize-none !pl-4"
+                  placeholder="Ej: Quiero un curso de desarrollo web moderno que cubra HTML5, CSS3, JavaScript ES6+, React y Node.js. Orientado a principiantes con ejercicios prácticos en cada lección."
+                  style={{ paddingLeft: '1rem' }}
+                />
+
+                <div>
+                  <p className="text-xs text-slate-500 mb-2">💡 Sugerencias:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {promptSuggestions.map((s, i) => (
+                      <motion.button
+                        key={i}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setPrompt(s)}
+                        className="text-xs px-3 py-1.5 rounded-full border border-slate-700/50 text-slate-400 hover:border-[#38bdf8]/30 hover:text-[#38bdf8] hover:bg-[#38bdf8]/5 transition-all"
+                      >
+                        {s}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+
+                <motion.button
+                  onClick={handleGenerate}
+                  disabled={generating || !prompt.trim()}
+                  whileHover={{ scale: generating ? 1 : 1.02 }}
+                  whileTap={{ scale: generating ? 1 : 0.98 }}
+                  className="btn-gradient-glow w-full flex items-center justify-center gap-2 py-3.5 text-base disabled:opacity-50"
+                >
+                  {generating ? (
+                    <>
+                      <div className="relative">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      </div>
+                      <span>Generando curso con IA...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      Generar Curso
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 2: Preview & Generate Content */}
+          {step >= 2 && course && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold mb-1">{course.title}</h1>
+                  <p className="text-slate-400">{course.description}</p>
+                  <span className="text-xs text-[#38bdf8] mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#38bdf8]/5 border border-[#38bdf8]/10">{course.category}</span>
+                </div>
+                {course.coverImage && (
+                  <motion.img initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} src={course.coverImage} alt="" className="w-24 h-24 rounded-xl object-cover border border-slate-700/30" />
+                )}
+              </div>
+
+              {/* Modules */}
+              <div className="space-y-3">
+                {course.modules?.map((mod: any, idx: number) => (
+                  <motion.div
+                    key={mod.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="glass-card rounded-xl overflow-hidden"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-sm font-bold text-blue-400">
-                        {idx + 1}
+                    <button
+                      onClick={() => toggleModule(idx)}
+                      className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3b82f6]/20 to-[#6366f1]/20 flex items-center justify-center text-sm font-bold text-[#38bdf8] border border-[#3b82f6]/10">
+                          {idx + 1}
+                        </div>
+                        <div className="text-left">
+                          <h3 className="font-medium">{mod.title}</h3>
+                          <p className="text-xs text-slate-400">{mod.lessons?.length || 0} lecciones</p>
+                        </div>
                       </div>
-                      <div className="text-left">
-                        <h3 className="font-medium">{mod.title}</h3>
-                        <p className="text-xs text-slate-400">{mod.lessons?.length || 0} lecciones</p>
-                      </div>
-                    </div>
-                    {expandedModules.has(idx) ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
-                  </button>
+                      <motion.div animate={{ rotate: expandedModules.has(idx) ? 180 : 0 }}>
+                        <ChevronDown className="w-5 h-5 text-slate-400" />
+                      </motion.div>
+                    </button>
 
-                  {expandedModules.has(idx) && (
-                    <div className="border-t border-slate-700/50 p-4 space-y-3">
-                      {mod.lessons?.map((lesson: any, lIdx: number) => (
-                        <div key={lesson.id} className="flex flex-col gap-3 p-4 rounded-lg bg-slate-800/30 border border-slate-700/50">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex items-start gap-3 flex-1">
-                              <span className="text-sm font-medium text-slate-500 mt-0.5">{lIdx + 1}.</span>
-                              <div>
-                                <h4 className="font-medium text-[15px] leading-tight mb-2">{lesson.title}</h4>
-                                <div className="flex items-center gap-4 text-xs">
-                                  {/* Status indicators */}
-                                  <div className="flex items-center gap-3">
-                                    <span className={`inline-flex items-center gap-1 ${hasContent(lesson) ? 'text-emerald-400' : 'text-slate-500'}`}>
-                                      {hasContent(lesson) ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                                      {hasContent(lesson) ? 'Texto listo' : 'Sin texto'}
-                                    </span>
-                                    <span className={`inline-flex items-center gap-1 ${hasAudio(lesson) ? 'text-emerald-400' : 'text-slate-500'}`}>
-                                      {hasAudio(lesson) ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                                      {hasAudio(lesson) ? 'Audio listo' : 'Sin audio'}
-                                    </span>
+                    <AnimatePresence>
+                      {expandedModules.has(idx) && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="border-t border-slate-700/30 p-4 space-y-3">
+                            {mod.lessons?.map((lesson: any, lIdx: number) => (
+                              <motion.div
+                                key={lesson.id}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: lIdx * 0.05 }}
+                                className="flex flex-col gap-3 p-4 rounded-xl bg-white/[0.02] border border-slate-700/30"
+                              >
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                  <div className="flex items-start gap-3 flex-1">
+                                    <span className="text-sm font-medium text-slate-500 mt-0.5">{lIdx + 1}.</span>
+                                    <div>
+                                      <h4 className="font-medium text-[15px] leading-tight mb-2">{lesson.title}</h4>
+                                      <div className="flex items-center gap-4 text-xs">
+                                        <span className={`inline-flex items-center gap-1 ${hasContent(lesson) ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                          {hasContent(lesson) ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                          {hasContent(lesson) ? 'Texto listo' : 'Sin texto'}
+                                        </span>
+                                        <span className={`inline-flex items-center gap-1 ${hasAudio(lesson) ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                          {hasAudio(lesson) ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                          {hasAudio(lesson) ? 'Audio listo' : 'Sin audio'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex gap-2 shrink-0 self-start sm:self-center">
+                                    <motion.button
+                                      whileHover={{ scale: 1.03 }}
+                                      whileTap={{ scale: 0.97 }}
+                                      onClick={() => generateLessonContent(lesson.id)}
+                                      disabled={generatingContent.has(lesson.id)}
+                                      className="text-xs px-3 py-1.5 rounded-lg border border-[#3b82f6]/20 text-[#38bdf8] hover:bg-[#3b82f6]/10 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                    >
+                                      {generatingContent.has(lesson.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                                      {hasContent(lesson) ? 'Regenerar Texto' : 'Generar Texto'}
+                                    </motion.button>
+                                    <motion.button
+                                      whileHover={{ scale: 1.03 }}
+                                      whileTap={{ scale: 0.97 }}
+                                      onClick={() => generateAudio(lesson.id)}
+                                      disabled={generatingAudio.has(lesson.id) || !hasContent(lesson)}
+                                      className="text-xs px-3 py-1.5 rounded-lg border border-[#06b6d4]/20 text-[#06b6d4] hover:bg-[#06b6d4]/10 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                      title={!hasContent(lesson) ? 'Genera el contenido de texto primero' : ''}
+                                    >
+                                      {generatingAudio.has(lesson.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Volume2 className="w-3 h-3" />}
+                                      {hasAudio(lesson) ? 'Regenerar Audio' : 'Generar Audio'}
+                                    </motion.button>
                                   </div>
                                 </div>
-                              </div>
-                            </div>
-                            
-                            <div className="flex gap-2 shrink-0 self-start sm:self-center">
-                              <button
-                                onClick={() => generateLessonContent(lesson.id)}
-                                disabled={generatingContent.has(lesson.id)}
-                                className="text-xs px-3 py-1.5 rounded-lg border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 transition-all disabled:opacity-50 flex items-center gap-1.5"
-                              >
-                                {generatingContent.has(lesson.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                                {hasContent(lesson) ? 'Regenerar Texto' : 'Generar Texto'}
-                              </button>
-                              <button
-                                onClick={() => generateAudio(lesson.id)}
-                                disabled={generatingAudio.has(lesson.id) || !hasContent(lesson)}
-                                className="text-xs px-3 py-1.5 rounded-lg border border-teal-500/30 text-teal-400 hover:bg-teal-500/10 transition-all disabled:opacity-50 flex items-center gap-1.5"
-                                title={!hasContent(lesson) ? 'Genera el contenido de texto primero' : ''}
-                              >
-                                {generatingAudio.has(lesson.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : '🔊'}
-                                {hasAudio(lesson) ? 'Regenerar Audio' : 'Generar Audio'}
-                              </button>
-                            </div>
+                              </motion.div>
+                            ))}
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                ))}
+              </div>
 
-            {/* Actions */}
-            <div className="flex gap-4">
-              <button onClick={publishCourse} disabled={publishing} className="btn-primary flex-1 flex items-center justify-center gap-2 disabled:opacity-50">
-                {publishing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Eye className="w-5 h-5" />}
-                {publishing ? 'Publicando...' : 'Publicar Curso'}
-              </button>
-              <button onClick={() => router.push('/teacher')} className="btn-secondary">
-                Guardar como Borrador
-              </button>
-            </div>
-          </div>
-        )}
+              {/* Actions */}
+              <div className="flex gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={publishCourse}
+                  disabled={publishing}
+                  className="btn-gradient-glow flex-1 flex items-center justify-center gap-2 py-3.5 disabled:opacity-50"
+                >
+                  {publishing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Eye className="w-5 h-5" />}
+                  {publishing ? 'Publicando...' : 'Publicar Curso'}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/teacher')}
+                  className="btn-secondary px-6"
+                >
+                  Guardar como Borrador
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </DashboardLayout>
   );

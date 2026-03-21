@@ -1,11 +1,257 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, Sparkles, Users, BarChart3, Mic, Image, GraduationCap, ArrowRight, Star, Zap, Shield, Globe } from 'lucide-react';
+import NextImage from 'next/image';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import {
+  BarChart3,
+  BookOpen,
+  GraduationCap,
+  Image as ImageIcon,
+  Mic,
+  Shield,
+  Sparkles,
+  Star,
+  Users,
+  ArrowRight,
+  Zap,
+  Globe,
+  ChevronRight,
+} from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
+/* ========== ANIMATED COUNTER ========== */
+function AnimatedCounter({ value, suffix = '' }: { value: string; suffix?: string }) {
+  return (
+    <motion.span
+      className="number-counter"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      viewport={{ once: true }}
+    >
+      {value}{suffix}
+    </motion.span>
+  );
+}
+
+/* ========== FLOATING PARTICLES ========== */
+function FloatingParticles() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; hue: number }[] = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Create particles
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 2 + 0.5,
+        opacity: Math.random() * 0.5 + 0.1,
+        hue: Math.random() * 60 + 190, // blue-cyan range
+      });
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, ${p.opacity})`;
+        ctx.fill();
+
+        // Connect nearby particles with lines
+        particles.forEach((p2, j) => {
+          if (i === j) return;
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `hsla(200, 80%, 70%, ${0.06 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        });
+      });
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" />;
+}
+
+/* ========== TYPING EFFECT ========== */
+function TypingEffect({ words }: { words: string[] }) {
+  const [currentWord, setCurrentWord] = useState(0);
+  const [currentChar, setCurrentChar] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const word = words[currentWord];
+    const typeSpeed = isDeleting ? 40 : 80;
+
+    const timeout = setTimeout(() => {
+      if (!isDeleting && currentChar === word.length) {
+        setTimeout(() => setIsDeleting(true), 2000);
+        return;
+      }
+      if (isDeleting && currentChar === 0) {
+        setIsDeleting(false);
+        setCurrentWord((prev) => (prev + 1) % words.length);
+        return;
+      }
+
+      setCurrentChar((prev) => prev + (isDeleting ? -1 : 1));
+    }, typeSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [currentChar, isDeleting, currentWord, words]);
+
+  return (
+    <span className="gradient-text-animated">
+      {words[currentWord].substring(0, currentChar)}
+      <span className="animate-pulse text-[#38bdf8]">|</span>
+    </span>
+  );
+}
+
+/* ========== SECTION WRAPPER WITH SCROLL ANIMATION ========== */
+function AnimatedSection({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 60 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+      transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ========== FEATURE CARD ========== */
+function FeatureCard({ feature, index }: { feature: any; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+      viewport={{ once: true }}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }}
+      className="glass-card p-8 group cursor-default"
+    >
+      <div className="relative mb-6">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#38bdf8]/20 to-[#818cf8]/20 flex items-center justify-center border border-[#38bdf8]/10 group-hover:border-[#38bdf8]/30 transition-all duration-500 group-hover:shadow-[0_0_30px_rgba(56,189,248,0.15)]">
+          <feature.icon className="h-7 w-7 text-[#38bdf8] group-hover:text-[#818cf8] transition-colors duration-500" />
+        </div>
+        <div className="absolute -inset-2 bg-[#38bdf8] opacity-0 group-hover:opacity-5 blur-2xl rounded-full transition-opacity duration-500" />
+      </div>
+      <h3 className="mb-3 text-xl font-semibold text-white group-hover:text-[#38bdf8] transition-colors duration-300">{feature.title}</h3>
+      <p className="text-slate-400 leading-relaxed text-sm">{feature.description}</p>
+    </motion.div>
+  );
+}
+
+/* ========== STEP CARD ========== */
+function StepCard({ item, index }: { item: any; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
+      viewport={{ once: true }}
+      className="relative z-10 glass-card p-8 text-center group"
+    >
+      <motion.div
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        transition={{ type: "spring", stiffness: 300 }}
+        className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#0a1128] to-[#0a1128] border-2 border-[#38bdf8]/20 group-hover:border-[#38bdf8]/50 transition-all duration-500 relative"
+      >
+        <div className="absolute inset-0 rounded-full bg-[#38bdf8] opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500" />
+        <span className="text-2xl font-bold gradient-text-animated">{item.number}</span>
+      </motion.div>
+      <h3 className="mb-3 text-xl font-semibold text-white">{item.title}</h3>
+      <p className="text-slate-400 leading-relaxed text-sm">{item.description}</p>
+    </motion.div>
+  );
+}
+
+/* ========== DATA ========== */
+const stats = [
+  { value: 'Automática', label: 'Estructuración Generativa', icon: Sparkles },
+  { value: 'Integral', label: 'Creación E2E para Profesores', icon: Mic },
+  { value: 'Pexels API', label: 'Enriquecimiento Visual', icon: ImageIcon },
+  { value: 'Gratuita', label: 'Acceso Inmediato Base', icon: Star },
+];
+
+const features = [
+  { title: 'Generación Textual con IA', description: 'Estructura inteligentemente el texto, el temario y el contenido interactivo del curso.', icon: Sparkles },
+  { title: 'Audio Narrado con TTS', description: 'Convierte el texto en audio natural mediante generadores TTS de última generación.', icon: Mic },
+  { title: 'Imágenes Relevantes', description: 'Cobertura visual automática con imágenes semánticamente conectadas al contenido.', icon: ImageIcon },
+  { title: 'Panel Multi-Rol', description: 'Gates omnidireccionales controlados para Estudiantes, Profesores y Administradores.', icon: Users },
+  { title: 'Analíticas en Tiempo Real', description: 'Dashboard de administrador con métricas avanzadas sobre el uso de la IA.', icon: BarChart3 },
+  { title: 'Seguridad JWT', description: 'Cifrado de grado empresarial mediante JSON Web Tokens para todas las sesiones.', icon: Shield },
+];
+
+const steps = [
+  { number: '01', title: 'Especificación de Prompt', description: 'Define el tema central utilizando una instrucción clara para nuestra Inteligencia Artificial.' },
+  { number: '02', title: 'Síntesis Estructural', description: 'El motor inteligente de EduCube extrae el temario, imágenes, cuestionarios y contenido de manera autónoma.' },
+  { number: '03', title: 'Despliegue Educativo', description: 'Tu curso se publica para que la comunidad interactúe con el entorno de aprendizaje al instante.' },
+];
+
+/* ========== MAIN COMPONENT ========== */
 export default function LandingPage() {
   const { user } = useAuth();
+  const { scrollYProgress } = useScroll();
+  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -80]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
+  const navBg = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
+  const [navSolid, setNavSolid] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = navBg.on('change', (v) => setNavSolid(v > 0.5));
+    return unsubscribe;
+  }, [navBg]);
 
   const getDashboardLink = () => {
     if (!user) return '/login';
@@ -16,298 +262,385 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden">
+    <div className="min-h-screen relative bg-[#050a18] text-white selection:bg-[#38bdf8]/30 overflow-x-hidden">
+      <FloatingParticles />
+
+      {/* Background Orbs */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="orb w-[600px] h-[600px] bg-[#38bdf8] top-[-200px] right-[-200px]" style={{ animation: 'morphBlob 15s ease-in-out infinite' }} />
+        <div className="orb w-[500px] h-[500px] bg-[#818cf8] bottom-[-100px] left-[-100px]" style={{ animation: 'morphBlob 18s ease-in-out infinite reverse' }} />
+        <div className="orb w-[400px] h-[400px] bg-[#a78bfa] top-[40%] left-[60%]" style={{ animation: 'morphBlob 12s ease-in-out infinite' }} />
+      </div>
+
+      {/* Grid Pattern Overlay */}
+      <div className="fixed inset-0 grid-pattern pointer-events-none z-[1]" />
+
       {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 glass-strong">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-teal-600 flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold gradient-text">EduCubeIA</span>
+      <motion.nav
+        className={`fixed top-0 left-0 right-0 px-6 py-4 z-50 transition-all duration-500 ${
+          navSolid ? 'bg-[#050a18]/90 backdrop-blur-xl border-b border-slate-800/50 shadow-lg shadow-black/20' : ''
+        }`}
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
+            <motion.div 
+              whileHover={{ rotate: 15, scale: 1.1 }} 
+              transition={{ type: "spring", stiffness: 300 }}
+              className="relative"
+            >
+              <BookOpen className="h-7 w-7 text-[#38bdf8]" />
+              <div className="absolute inset-0 bg-[#38bdf8] blur-lg opacity-30 group-hover:opacity-60 transition-opacity" />
+            </motion.div>
+            <span className="text-xl font-bold tracking-tight gradient-text">EduCubeIA</span>
           </Link>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-slate-300 hover:text-white transition-colors">Funcionalidades</a>
-            <a href="#how-it-works" className="text-slate-300 hover:text-white transition-colors">Como Funciona</a>
-            <a href="#roles" className="text-slate-300 hover:text-white transition-colors">Roles</a>
-          </div>
-          <div className="flex items-center gap-3">
-            {user ? (
-              <Link href={getDashboardLink()} className="btn-primary text-sm">
-                Ir al Dashboard
-              </Link>
-            ) : (
-              <>
-                <Link href="/login" className="btn-secondary text-sm">Iniciar Sesion</Link>
-                <Link href="/register" className="btn-primary text-sm">Registrarse</Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6">
-        {/* Background effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl animate-float"></div>
-          <div className="absolute bottom-20 right-1/4 w-80 h-80 bg-teal-600/15 rounded-full blur-3xl animate-float-delayed"></div>
-          <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-blue-800/8 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center max-w-4xl mx-auto animate-slide-up">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
-              <Sparkles className="w-4 h-4 text-orange-400" />
-              <span className="text-sm text-slate-300">Potenciado por Inteligencia Artificial</span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
-              Cursos creados con{' '}
-              <span className="gradient-text">Inteligencia Artificial</span>
-            </h1>
-            <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Profesores generan cursos completos con texto, imagenes y audio usando IA.
-              Estudiantes acceden a contenido educativo de alta calidad en segundos.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register?role=teacher" className="btn-primary text-lg flex items-center gap-2 w-full sm:w-auto justify-center">
-                <GraduationCap className="w-5 h-5" />
-                Soy Profesor
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link href="/register?role=student" className="btn-secondary text-lg flex items-center gap-2 w-full sm:w-auto justify-center">
-                <BookOpen className="w-5 h-5" />
-                Soy Estudiante
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20 max-w-3xl mx-auto animate-fade-in">
-            {[
-              { label: 'Generacion con IA', icon: Sparkles, value: 'Automatica' },
-              { label: 'Texto + Audio', icon: Mic, value: 'Incluido' },
-              { label: 'Imagenes', icon: Image, value: 'Pexels API' },
-              { label: '100% Gratuito', icon: Star, value: 'Gratis' },
-            ].map((stat, i) => (
-              <div key={i} className="glass rounded-xl p-4 text-center">
-                <stat.icon className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                <div className="text-lg font-bold text-white">{stat.value}</div>
-                <div className="text-xs text-slate-400">{stat.label}</div>
-              </div>
+          <div className="hidden items-center gap-8 md:flex">
+            {['Características', 'Cómo Funciona', 'Perfiles'].map((item, i) => (
+              <a key={i} href={`#${['features', 'how-it-works', 'roles'][i]}`} className="text-sm font-medium text-slate-400 hover:text-white transition-colors relative group">
+                {item}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#38bdf8] to-[#818cf8] group-hover:w-full transition-all duration-300" />
+              </a>
             ))}
           </div>
+
+          <Link href={getDashboardLink()}>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="text-sm font-semibold text-[#38bdf8] px-5 py-2.5 rounded-full border border-[#38bdf8]/30 hover:bg-[#38bdf8]/10 transition-all flex items-center gap-2"
+            >
+              {user ? 'Mi Dashboard' : 'Iniciar Sesión'}
+              <ArrowRight className="w-4 h-4" />
+            </motion.div>
+          </Link>
         </div>
-      </section>
+      </motion.nav>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">
-              Funcionalidades <span className="gradient-text">Poderosas</span>
-            </h2>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Todo lo que necesitas para crear y consumir contenido educativo de calidad
-            </p>
-          </div>
+      <main className="mx-auto max-w-7xl px-6 relative z-10">
+        {/* ========== HERO SECTION ========== */}
+        <motion.section
+          style={{ y: heroY, opacity: heroOpacity }}
+          className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center pt-32 pb-32 min-h-[90vh]"
+        >
+          <div className="max-w-xl z-20">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#38bdf8]/5 border border-[#38bdf8]/15 text-[#38bdf8] text-sm font-medium mb-8"
+            >
+              <Zap className="w-4 h-4" />
+              Plataforma educativa potenciada por IA
+              <ChevronRight className="w-4 h-4" />
+            </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                icon: Sparkles,
-                title: 'Generacion con IA',
-                description: 'Crea cursos completos con un solo prompt. La IA genera estructura, contenido y materiales automaticamente.',
-                color: 'from-blue-600 to-blue-800',
-              },
-              {
-                icon: Mic,
-                title: 'Audio con TTS',
-                description: 'Genera narraciones automaticas de cada leccion. Tus estudiantes pueden escuchar el contenido.',
-                color: 'from-teal-600 to-teal-800',
-              },
-              {
-                icon: Image,
-                title: 'Imagenes Relevantes',
-                description: 'Imagenes profesionales de alta calidad seleccionadas automaticamente para cada leccion.',
-                color: 'from-orange-500 to-orange-700',
-              },
-              {
-                icon: BarChart3,
-                title: 'Panel de Administrador',
-                description: 'Estadisticas detalladas con graficas. Monitorea usuarios, cursos e inscripciones en tiempo real.',
-                color: 'from-emerald-600 to-emerald-800',
-              },
-              {
-                icon: Users,
-                title: 'Multi-Rol',
-                description: 'Tres roles diferenciados: Profesor, Estudiante y Administrador. Cada uno con su dashboard personalizado.',
-                color: 'from-rose-600 to-rose-800',
-              },
-              {
-                icon: Shield,
-                title: 'Seguridad JWT',
-                description: 'Autenticacion segura con tokens JWT. Proteccion basada en roles para cada endpoint.',
-                color: 'from-violet-600 to-violet-800',
-              },
-            ].map((feature, i) => (
-              <div key={i} className="card p-6 group">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <feature.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.05]"
+            >
+              Cursos creados
+              <br />
+              con <TypingEffect words={['Inteligencia Artificial', 'Tecnología Avanzada', 'Innovación Educativa']} />
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="text-slate-400 text-lg md:text-xl mb-10 leading-relaxed max-w-md"
+            >
+              Profesores generan cursos completos con inteligencia artificial. Texto, audio e imágenes — todo automatizado.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
+              className="flex flex-wrap gap-4"
+            >
+              <Link href="/register?role=teacher">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="btn-gradient-glow text-lg px-8 py-4 flex items-center gap-2">
+                  <GraduationCap className="w-5 h-5" />
+                  Soy Profesor
+                </motion.div>
+              </Link>
+              <Link href="/register?role=student">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-semibold text-lg hover:bg-white/10 transition-all flex items-center gap-2">
+                  <BookOpen className="w-5 h-5" />
+                  Soy Estudiante
+                </motion.div>
+              </Link>
+            </motion.div>
+
+            {/* Trust badges */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2, duration: 0.6 }}
+              className="flex items-center gap-6 mt-12 text-slate-500 text-sm"
+            >
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                <span>100% Gratuito</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section id="how-it-works" className="py-20 px-6 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/10 to-transparent"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">
-              Como <span className="gradient-text">Funciona</span>
-            </h2>
-            <p className="text-slate-400 text-lg">Tres simples pasos para comenzar</p>
+              <div className="w-px h-4 bg-slate-700" />
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                <span>Seguro & Privado</span>
+              </div>
+              <div className="w-px h-4 bg-slate-700" />
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                <span>IA en Tiempo Real</span>
+              </div>
+            </motion.div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                step: '01',
-                title: 'Escribe un Prompt',
-                description: 'El profesor describe el curso que quiere crear. La IA entiende el contexto y genera la estructura completa.',
-                icon: Zap,
-              },
-              {
-                step: '02',
-                title: 'La IA Genera Todo',
-                description: 'Contenido, imagenes, audio narrado... La IA crea un curso completo listo para publicar o personalizar.',
-                icon: Sparkles,
-              },
-              {
-                step: '03',
-                title: 'Estudiantes Aprenden',
-                description: 'Los estudiantes exploran el catalogo, se inscriben y aprenden con contenido multimedia de alta calidad.',
-                icon: GraduationCap,
-              },
-            ].map((item, i) => (
-              <div key={i} className="relative">
-                <div className="glass rounded-2xl p-8 text-center h-full">
-                  <div className="text-6xl font-extrabold gradient-text opacity-30 mb-4">{item.step}</div>
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-teal-600 flex items-center justify-center mx-auto mb-4">
-                    <item.icon className="w-8 h-8 text-white" />
+          {/* Brain Graphic */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, x: 50 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="relative flex justify-center lg:justify-end z-10 lg:-mr-24 xl:-mr-32 mt-12 lg:mt-0"
+          >
+            <div className="relative w-[115%] sm:w-[125%] lg:w-[135%] max-w-[950px]">
+              {/* Animated glow rings */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] border border-[#38bdf8]/5 rounded-full" style={{ animation: 'spinSlow 20s linear infinite' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] h-[75%] border border-[#818cf8]/5 rounded-full" style={{ animation: 'spinSlow 30s linear infinite reverse' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] border border-[#a78bfa]/3 rounded-full" style={{ animation: 'spinSlow 40s linear infinite' }} />
+
+              {/* Main glow */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-gradient-to-br from-[#38bdf8] to-[#818cf8] opacity-[0.06] blur-[100px] rounded-full" style={{ animation: 'morphBlob 10s ease-in-out infinite' }} />
+
+              <NextImage
+                src="/cerebro.png"
+                alt="Cerebro Inteligencia Artificial"
+                width={1000}
+                height={800}
+                className="w-full h-auto object-contain animate-float-slow mix-blend-screen opacity-[0.85] filter drop-shadow-[0_0_30px_rgba(56,189,248,0.25)]"
+                priority
+              />
+
+              {/* Orbiting dots */}
+              <div className="absolute top-1/2 left-1/2 w-3 h-3 rounded-full bg-[#38bdf8] shadow-[0_0_15px_rgba(56,189,248,0.6)]" style={{ animation: 'orbit 8s linear infinite' }} />
+              <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-[#818cf8] shadow-[0_0_15px_rgba(129,140,248,0.6)]" style={{ animation: 'orbit 12s linear infinite reverse' }} />
+            </div>
+          </motion.div>
+        </motion.section>
+
+        {/* ========== STATS ========== */}
+        <AnimatedSection>
+          <section className="pb-24 relative z-10 border-b border-slate-800/30">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {stats.map((stat, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="glass-card p-6 flex items-start gap-4"
+                >
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#38bdf8]/10 to-[#818cf8]/10 border border-[#38bdf8]/10">
+                    <stat.icon className="h-5 w-5 text-[#38bdf8]" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                  <p className="text-slate-400 leading-relaxed">{item.description}</p>
-                </div>
-                {i < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-20">
-                    <ArrowRight className="w-8 h-8 text-blue-500/40" />
+                  <div>
+                    <p className="text-lg font-bold text-white mb-1">{stat.value}</p>
+                    <p className="text-sm text-slate-400 leading-snug">{stat.label}</p>
                   </div>
-                )}
-              </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        </AnimatedSection>
+
+        {/* ========== FEATURES ========== */}
+        <section id="features" className="py-24 border-b border-slate-800/30">
+          <AnimatedSection className="mb-16 text-center">
+            <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#818cf8]/5 border border-[#818cf8]/15 text-[#818cf8] text-sm font-medium mb-6">
+              <Sparkles className="w-4 h-4" />
+              Funcionalidades
+            </motion.div>
+            <h2 className="text-3xl font-bold sm:text-5xl text-white mb-4">
+              Características <span className="gradient-text">Principales</span>
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+              Herramientas diseñadas para potenciar la enseñanza y el aprendizaje con IA de última generación.
+            </p>
+          </AnimatedSection>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature, i) => (
+              <FeatureCard key={i} feature={feature} index={i} />
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Roles Section */}
-      <section id="roles" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">
-              Elige tu <span className="gradient-text">Rol</span>
+        {/* ========== HOW IT WORKS ========== */}
+        <section id="how-it-works" className="py-24 border-b border-slate-800/30">
+          <AnimatedSection className="mb-16 text-center">
+            <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#06b6d4]/5 border border-[#06b6d4]/15 text-[#06b6d4] text-sm font-medium mb-6">
+              <Zap className="w-4 h-4" />
+              Proceso
+            </motion.div>
+            <h2 className="text-3xl font-bold sm:text-5xl text-white mb-4">
+              ¿Cómo <span className="gradient-text">Funciona</span>?
             </h2>
-            <p className="text-slate-400 text-lg">Cada rol tiene un dashboard personalizado</p>
+            <p className="text-slate-400 text-lg">Crea tu curso en tres sencillos pasos</p>
+          </AnimatedSection>
+
+          <div className="grid gap-8 md:grid-cols-3 relative">
+            {/* Connecting line */}
+            <div className="hidden md:block absolute top-[60px] left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#38bdf8]/20 via-[#818cf8]/20 to-[#a78bfa]/20" />
+            {steps.map((item, i) => (
+              <StepCard key={i} item={item} index={i} />
+            ))}
           </div>
+        </section>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="card p-8 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center mx-auto mb-6">
-                <GraduationCap className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Profesor</h3>
-              <p className="text-slate-400 mb-6 leading-relaxed">
-                Genera cursos completos con IA. Crea contenido con texto, imagenes y audio.
-                Organiza modulos y lecciones.
-              </p>
-              <Link href="/register?role=teacher" className="btn-primary inline-flex items-center gap-2">
-                Registrarme <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            <div className="card p-8 text-center relative overflow-hidden">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-gradient-to-r from-orange-500 to-orange-600 text-xs font-bold rounded-bl-lg">
-                POPULAR
-              </div>
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-800 flex items-center justify-center mx-auto mb-6">
-                <BookOpen className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Estudiante</h3>
-              <p className="text-slate-400 mb-6 leading-relaxed">
-                Explora cursos de alta calidad. Aprende con contenido multimedia generado por IA.
-                Rastrea tu progreso.
-              </p>
-              <Link href="/register?role=student" className="btn-primary inline-flex items-center gap-2">
-                Registrarme <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            <div className="card p-8 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center mx-auto mb-6">
-                <BarChart3 className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Administrador</h3>
-              <p className="text-slate-400 mb-6 leading-relaxed">
-                Monitorea la plataforma completa. Estadisticas en tiempo real con graficas interactivas.
-              </p>
-              <Link href="/login" className="btn-secondary inline-flex items-center gap-2">
-                Acceder <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto glass rounded-3xl p-12 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/8 to-teal-600/8"></div>
-          <div className="relative z-10">
-            <h2 className="text-4xl font-bold mb-4">
-              Empieza a crear cursos con <span className="gradient-text">IA hoy</span>
+        {/* ========== ROLES ========== */}
+        <section id="roles" className="py-24 border-b border-slate-800/30">
+          <AnimatedSection className="mb-16 text-center">
+            <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#a78bfa]/5 border border-[#a78bfa]/15 text-[#a78bfa] text-sm font-medium mb-6">
+              <Users className="w-4 h-4" />
+              Perfiles
+            </motion.div>
+            <h2 className="text-3xl font-bold sm:text-5xl text-white mb-4">
+              Elige tu <span className="gradient-text">Perfil</span>
             </h2>
-            <p className="text-slate-400 text-lg mb-8 max-w-2xl mx-auto">
-              Unite a EduCubeIA y transforma la manera en que creas y consumes contenido educativo
-            </p>
-            <Link href="/register" className="btn-primary text-lg inline-flex items-center gap-2">
-              Comenzar Ahora <ArrowRight className="w-5 h-5" />
-            </Link>
+            <p className="text-slate-400 text-lg">Plataforma adaptada a tus necesidades educativas</p>
+          </AnimatedSection>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {/* Teacher */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -8 }}
+              className="glass-card p-10 text-center flex flex-col h-full"
+            >
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3b82f6]/10 to-[#818cf8]/10 border border-[#3b82f6]/20">
+                <GraduationCap className="h-10 w-10 text-[#38bdf8]" />
+              </div>
+              <h3 className="mb-2 text-2xl font-bold text-white">Profesor</h3>
+              <p className="mb-8 text-sm text-slate-400 flex-grow">Arquitecto del conocimiento. Diseña y despliega cursos automáticos con IA generativa.</p>
+              <Link href="/register?role=teacher">
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="w-full rounded-full border border-[#38bdf8]/30 bg-transparent px-6 py-3 font-semibold text-[#38bdf8] transition-all hover:bg-[#38bdf8]/10 hover:shadow-[0_0_20px_rgba(56,189,248,0.1)]">
+                  Acceso Profesor
+                </motion.div>
+              </Link>
+            </motion.div>
+
+            {/* Student - Popular */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -12 }}
+              className="glass-card !overflow-visible p-10 text-center relative flex flex-col h-full scale-105 border-[#38bdf8]/20 z-10"
+              style={{ boxShadow: '0 0 60px rgba(56,189,248,0.08), 0 20px 50px rgba(0,0,0,0.4)' }}
+            >
+              <div className="absolute top-0 inset-x-0 mx-auto -translate-y-1/2 w-max">
+                <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }} className="rounded-full bg-gradient-to-r from-[#38bdf8] to-[#818cf8] px-5 py-1.5 text-xs font-bold text-white uppercase tracking-widest shadow-lg shadow-[#38bdf8]/20">
+                  ⚡ Más Popular
+                </motion.div>
+              </div>
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#38bdf8]/15 to-[#818cf8]/15 border border-[#38bdf8]/30 shadow-[0_0_30px_rgba(56,189,248,0.12)]">
+                <BookOpen className="h-10 w-10 text-[#38bdf8]" />
+              </div>
+              <h3 className="mb-2 text-2xl font-bold text-white">Estudiante</h3>
+              <p className="mb-8 text-sm text-slate-300 flex-grow">El nodo receptor. Aprende y consume conocimiento eficientemente con contenido generado por IA.</p>
+              <Link href="/register?role=student">
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="w-full btn-gradient-glow flex items-center justify-center text-center">
+                  Unirse como Estudiante
+                </motion.div>
+              </Link>
+            </motion.div>
+
+            {/* Admin */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -8 }}
+              className="glass-card p-10 text-center flex flex-col h-full"
+            >
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-700/20 to-slate-600/20 border border-slate-600/20">
+                <BarChart3 className="h-10 w-10 text-slate-400" />
+              </div>
+              <h3 className="mb-2 text-2xl font-bold text-white">Administrador</h3>
+              <p className="mb-8 text-sm text-slate-400 flex-grow">Monitoreo absoluto del ecosistema y de los agentes de inteligencia artificial.</p>
+              <Link href="/login">
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="w-full rounded-full border border-slate-700 bg-transparent px-6 py-3 font-semibold text-slate-300 transition-all hover:bg-slate-800/50">
+                  Acceso Consola
+                </motion.div>
+              </Link>
+            </motion.div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* ========== CTA SECTION ========== */}
+        <section className="py-32">
+          <AnimatedSection>
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="mx-auto max-w-4xl text-center glass-card relative overflow-hidden p-12 lg:p-20 border-[#38bdf8]/10"
+              style={{ boxShadow: '0 0 80px rgba(56,189,248,0.05)' }}
+            >
+              {/* Animated gradient bg */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#38bdf8]/5 via-transparent to-[#818cf8]/5 pointer-events-none" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#38bdf8]/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#818cf8]/30 to-transparent" />
+
+              <motion.div
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+                viewport={{ once: true }}
+                className="mx-auto mb-8 w-16 h-16 rounded-full bg-gradient-to-br from-[#38bdf8]/20 to-[#818cf8]/20 flex items-center justify-center border border-[#38bdf8]/20"
+              >
+                <Sparkles className="w-8 h-8 text-[#38bdf8]" />
+              </motion.div>
+
+              <h2 className="mb-6 text-4xl font-bold sm:text-5xl text-white relative z-10">
+                Comienza a <span className="gradient-text-animated">Crear Hoy</span>
+              </h2>
+              <p className="mb-10 text-xl text-slate-400 max-w-2xl mx-auto relative z-10">
+                Únete a la nueva era de la educación asistida por inteligencia artificial y despliega cursos completos en minutos.
+              </p>
+              <Link href="/register" className="relative z-10">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-gradient-glow px-10 py-4 text-xl inline-flex items-center gap-3"
+                >
+                  Comenzar Ahora
+                  <ArrowRight className="w-5 h-5" />
+                </motion.div>
+              </Link>
+            </motion.div>
+          </AnimatedSection>
+        </section>
+      </main>
 
       {/* Footer */}
-      <footer className="py-8 px-6 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="border-t border-slate-800/30 px-6 py-10 relative z-10">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-teal-600 flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold gradient-text">EduCubeIA</span>
+            <BookOpen className="h-5 w-5 text-[#38bdf8]/50" />
+            <span className="font-semibold text-slate-500 tracking-tight">EduCubeIA</span>
           </div>
-          <p className="text-sm text-slate-500">
-            Hackathon CubePath 2026 &copy; {new Date().getFullYear()}
+          <p className="text-sm text-slate-600">
+            &copy; {new Date().getFullYear()} EduCubeIA. Todos los derechos reservados.
           </p>
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Globe className="w-4 h-4" />
-            Desplegado en CubePath
-          </div>
         </div>
       </footer>
     </div>
