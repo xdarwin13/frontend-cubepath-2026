@@ -574,7 +574,7 @@ export default function LandingPage() {
 
           <div className="grid gap-8 md:grid-cols-3 relative">
             {/* Connecting line */}
-            <div className="hidden md:block absolute top-[60px] left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-[#38bdf8]/20 via-[#818cf8]/20 to-[#a78bfa]/20" />
+            <div className="hidden md:block absolute top-[72px] left-[16.67%] right-[16.67%] h-px bg-gradient-to-r from-transparent via-[#38bdf8]/15 to-transparent" />
             {steps.map((item, i) => (
               <StepCard key={i} item={item} index={i} />
             ))}
