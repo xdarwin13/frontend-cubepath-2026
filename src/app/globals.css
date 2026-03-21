@@ -156,12 +156,21 @@ body {
   /* ---- GLASS ---- */
   .glass-card {
     background: rgba(10, 17, 40, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(56, 189, 248, 0.08);
     border-radius: 1rem;
     position: relative;
     overflow: hidden;
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  @media (max-width: 767px) {
+    .glass-card {
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
   }
 
   .glass-card::before {
@@ -181,15 +190,29 @@ body {
 
   .glass {
     background: rgba(10, 17, 40, 0.4);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(56, 189, 248, 0.06);
+    transform: translateZ(0);
   }
 
   .glass-strong {
     background: rgba(5, 10, 24, 0.85);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-right: 1px solid rgba(56, 189, 248, 0.06);
+    transform: translateZ(0);
+  }
+
+  @media (max-width: 767px) {
+    .glass {
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .glass-strong {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
   }
 
   .card {
@@ -220,19 +243,25 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     animation: gradientText 6s ease infinite;
+    will-change: background-position;
   }
 
   /* ---- FLOATING ANIMATIONS ---- */
   .animate-float-slow {
     animation: floatSlow 6s ease-in-out infinite;
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .animate-float-medium {
     animation: floatMedium 4s ease-in-out infinite;
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .animate-pulse-glow {
     animation: pulseGlow 3s ease-in-out infinite;
+    will-change: opacity, filter;
   }
 
   /* ---- SLIDE ANIMATIONS ---- */
@@ -296,6 +325,17 @@ body {
     filter: blur(100px);
     pointer-events: none;
     opacity: 0.08;
+    will-change: transform, border-radius;
+    transform: translateZ(0);
+    contain: layout style paint;
+  }
+
+  @media (max-width: 767px) {
+    .orb {
+      filter: blur(60px);
+      opacity: 0.05;
+      animation-duration: 20s !important;
+    }
   }
 
   /* ---- GRID PATTERN ---- */
@@ -304,6 +344,15 @@ body {
       linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
     background-size: 60px 60px;
+    contain: strict;
+    transform: translateZ(0);
+  }
+
+  @media (max-width: 767px) {
+    .grid-pattern {
+      background-size: 80px 80px;
+      opacity: 0.5;
+    }
   }
 
   /* ---- MARKDOWN CONTENT ---- */

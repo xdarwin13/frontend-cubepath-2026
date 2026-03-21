@@ -45,65 +45,99 @@ function FloatingParticles() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
     let animationId: number;
-    const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; hue: number }[] = [];
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 20 : 40;
+    const connectionDistSq = isMobile ? 8100 : 14400; // 90² / 120²
+    const connectionDist = isMobile ? 90 : 120;
+
+    type Particle = { x: number; y: number; vx: number; vy: number; size: number; opacity: number; hue: number };
+    const particles: Particle[] = [];
+
+    const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 2);
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
-    window.addEventListener('resize', resize);
 
-    // Create particles
-    for (let i = 0; i < 60; i++) {
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 200);
+    };
+    window.addEventListener('resize', debouncedResize);
+
+    const w = () => canvas.width / dpr;
+    const h = () => canvas.height / dpr;
+
+    for (let i = 0; i < particleCount; i++) {
       particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
         size: Math.random() * 2 + 0.5,
         opacity: Math.random() * 0.5 + 0.1,
-        hue: Math.random() * 60 + 190, // blue-cyan range
+        hue: Math.random() * 60 + 190,
       });
     }
 
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let isVisible = true;
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisible = entry.isIntersecting; },
+      { threshold: 0 }
+    );
+    observer.observe(canvas);
 
-      particles.forEach((p, i) => {
+    const animate = () => {
+      if (!isVisible) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+
+      const cw = w();
+      const ch = h();
+      ctx.clearRect(0, 0, cw, ch);
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
+        if (p.x < 0) p.x = cw;
+        else if (p.x > cw) p.x = 0;
+        if (p.y < 0) p.y = ch;
+        else if (p.y > ch) p.y = 0;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, ${p.opacity})`;
         ctx.fill();
 
-        // Connect nearby particles with lines
-        particles.forEach((p2, j) => {
-          if (i === j) return;
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
           const dx = p.x - p2.x;
           const dy = p.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          const distSq = dx * dx + dy * dy;
+          if (distSq < connectionDistSq) {
+            const alpha = 0.06 * (1 - Math.sqrt(distSq) / connectionDist);
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `hsla(200, 80%, 70%, ${0.06 * (1 - dist / 120)})`;
+            ctx.strokeStyle = `hsla(200, 80%, 70%, ${alpha})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
-        });
-      });
+        }
+      }
 
       animationId = requestAnimationFrame(animate);
     };
@@ -111,11 +145,12 @@ function FloatingParticles() {
     animate();
     return () => {
       cancelAnimationFrame(animationId);
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', debouncedResize);
+      observer.disconnect();
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" />;
+  return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" style={{ willChange: 'contents' }} />;
 }
 
 /* ========== TYPING EFFECT ========== */
@@ -269,14 +304,14 @@ export default function LandingPage() {
       <FloatingParticles />
 
       {/* Background Orbs */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="orb w-[600px] h-[600px] bg-[#38bdf8] top-[-200px] right-[-200px]" style={{ animation: 'morphBlob 15s ease-in-out infinite' }} />
-        <div className="orb w-[500px] h-[500px] bg-[#818cf8] bottom-[-100px] left-[-100px]" style={{ animation: 'morphBlob 18s ease-in-out infinite reverse' }} />
-        <div className="orb w-[400px] h-[400px] bg-[#a78bfa] top-[40%] left-[60%]" style={{ animation: 'morphBlob 12s ease-in-out infinite' }} />
+      <div className="fixed inset-0 pointer-events-none z-0" style={{ contain: 'strict' }}>
+        <div className="orb w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-[#38bdf8] top-[-200px] right-[-200px]" style={{ animation: 'morphBlob 15s ease-in-out infinite' }} />
+        <div className="orb w-[350px] h-[350px] md:w-[500px] md:h-[500px] bg-[#818cf8] bottom-[-100px] left-[-100px]" style={{ animation: 'morphBlob 18s ease-in-out infinite reverse' }} />
+        <div className="orb w-[300px] h-[300px] md:w-[400px] md:h-[400px] bg-[#a78bfa] top-[40%] left-[60%]" style={{ animation: 'morphBlob 12s ease-in-out infinite' }} />
       </div>
 
       {/* Grid Pattern Overlay */}
-      <div className="fixed inset-0 grid-pattern pointer-events-none z-[1]" />
+      <div className="fixed inset-0 grid-pattern pointer-events-none z-[1]" style={{ contain: 'strict' }} />
 
       {/* Navbar */}
       <motion.nav
@@ -452,12 +487,12 @@ export default function LandingPage() {
           >
             <div className="relative w-full sm:w-[125%] lg:w-[135%] max-w-[950px]">
               {/* Animated glow rings */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] border border-[#38bdf8]/5 rounded-full" style={{ animation: 'spinSlow 20s linear infinite' }} />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] h-[75%] border border-[#818cf8]/5 rounded-full" style={{ animation: 'spinSlow 30s linear infinite reverse' }} />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] border border-[#a78bfa]/3 rounded-full" style={{ animation: 'spinSlow 40s linear infinite' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] border border-[#38bdf8]/5 rounded-full" style={{ animation: 'spinSlow 20s linear infinite', willChange: 'transform' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] h-[75%] border border-[#818cf8]/5 rounded-full hidden md:block" style={{ animation: 'spinSlow 30s linear infinite reverse', willChange: 'transform' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] border border-[#a78bfa]/3 rounded-full hidden md:block" style={{ animation: 'spinSlow 40s linear infinite', willChange: 'transform' }} />
 
               {/* Main glow */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-gradient-to-br from-[#38bdf8] to-[#818cf8] opacity-[0.06] blur-[100px] rounded-full" style={{ animation: 'morphBlob 10s ease-in-out infinite' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-gradient-to-br from-[#38bdf8] to-[#818cf8] opacity-[0.06] blur-[60px] md:blur-[100px] rounded-full" style={{ animation: 'morphBlob 10s ease-in-out infinite', willChange: 'transform, border-radius', contain: 'layout style paint' as any }} />
 
               <NextImage
                 src="/cerebro.png"
@@ -469,8 +504,8 @@ export default function LandingPage() {
               />
 
               {/* Orbiting dots */}
-              <div className="absolute top-1/2 left-1/2 w-3 h-3 rounded-full bg-[#38bdf8] shadow-[0_0_15px_rgba(56,189,248,0.6)]" style={{ animation: 'orbit 8s linear infinite' }} />
-              <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-[#818cf8] shadow-[0_0_15px_rgba(129,140,248,0.6)]" style={{ animation: 'orbit 12s linear infinite reverse' }} />
+              <div className="absolute top-1/2 left-1/2 w-3 h-3 rounded-full bg-[#38bdf8] shadow-[0_0_15px_rgba(56,189,248,0.6)]" style={{ animation: 'orbit 8s linear infinite', willChange: 'transform' }} />
+              <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-[#818cf8] shadow-[0_0_15px_rgba(129,140,248,0.6)] hidden md:block" style={{ animation: 'orbit 12s linear infinite reverse', willChange: 'transform' }} />
             </div>
           </motion.div>
         </motion.section>
@@ -592,9 +627,9 @@ export default function LandingPage() {
               style={{ boxShadow: '0 0 60px rgba(56,189,248,0.08), 0 20px 50px rgba(0,0,0,0.4)' }}
             >
               <div className="absolute top-0 inset-x-0 mx-auto -translate-y-1/2 w-max">
-                <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 2, repeat: Infinity }} className="rounded-full bg-gradient-to-r from-[#38bdf8] to-[#818cf8] px-5 py-1.5 text-xs font-bold text-white uppercase tracking-widest shadow-lg shadow-[#38bdf8]/20">
+                <div className="rounded-full bg-gradient-to-r from-[#38bdf8] to-[#818cf8] px-5 py-1.5 text-xs font-bold text-white uppercase tracking-widest shadow-lg shadow-[#38bdf8]/20 animate-float-medium">
                   ⚡ Más Popular
-                </motion.div>
+                </div>
               </div>
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#38bdf8]/15 to-[#818cf8]/15 border border-[#38bdf8]/30 shadow-[0_0_30px_rgba(56,189,248,0.12)]">
                 <BookOpen className="h-10 w-10 text-[#38bdf8]" />
