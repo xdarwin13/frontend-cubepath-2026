@@ -4,7 +4,7 @@ import { useState, useEffect, use, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { studentApi } from '@/lib/api';
 import DashboardLayout from '@/components/DashboardLayout';
-import { ArrowLeft, BookOpen, Loader2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, BookOpen, Loader2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Brain, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -18,6 +18,13 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
   const [activeLesson, setActiveLesson] = useState<any>(null);
   const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set([0]));
 
+  // Quiz state
+  const [quiz, setQuiz] = useState<any[]>([]);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
+
   useEffect(() => {
     if (token) loadCourse();
   }, [token]);
@@ -27,9 +34,40 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
       const data = await studentApi.getCourseDetail(resolvedParams.id, token!);
       setCourse(data.course);
       setEnrollment(data.enrollment);
-      // Set first lesson as active
-      if (data.course.modules?.[0]?.lessons?.[0]) {
-        setActiveLesson(data.course.modules[0].lessons[0]);
+
+      const allCourseLessons: any[] = [];
+      data.course.modules?.forEach((mod: any) => {
+        mod.lessons?.forEach((lesson: any) => allCourseLessons.push({ lesson, moduleIndex: data.course.modules.indexOf(mod) }));
+      });
+
+      let resumeLesson = null;
+      let resumeModuleIdx = 0;
+
+      if (data.enrollment?.lastLessonId) {
+        const found = allCourseLessons.find(l => l.lesson.id === data.enrollment.lastLessonId);
+        if (found) {
+          resumeLesson = found.lesson;
+          resumeModuleIdx = found.moduleIndex;
+        }
+      }
+
+      if (!resumeLesson && data.enrollment?.progress > 0 && allCourseLessons.length > 0) {
+        const approxIndex = Math.min(
+          Math.floor((data.enrollment.progress / 100) * allCourseLessons.length),
+          allCourseLessons.length - 1
+        );
+        resumeLesson = allCourseLessons[approxIndex].lesson;
+        resumeModuleIdx = allCourseLessons[approxIndex].moduleIndex;
+      }
+
+      if (!resumeLesson && allCourseLessons.length > 0) {
+        resumeLesson = allCourseLessons[0].lesson;
+        resumeModuleIdx = 0;
+      }
+
+      if (resumeLesson) {
+        setActiveLesson(resumeLesson);
+        setExpandedModules(new Set([resumeModuleIdx]));
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -75,11 +113,15 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
   const prevLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null;
   const nextLesson = currentLessonIndex < allLessons.length - 1 ? allLessons[currentLessonIndex + 1] : null;
 
-  const updateProgress = async (newProgress: number) => {
+  const updateProgress = async (newProgress: number, lessonId?: string) => {
     if (!enrollment) return;
     try {
-      await studentApi.updateProgress(enrollment.id, newProgress, token!);
-      setEnrollment((prev: any) => ({ ...prev, progress: newProgress }));
+      await studentApi.updateProgress(enrollment.id, newProgress, token!, lessonId);
+      setEnrollment((prev: any) => ({
+        ...prev,
+        progress: newProgress,
+        ...(lessonId ? { lastLessonId: lessonId } : {}),
+      }));
     } catch (error) {
       console.error('Error al actualizar progreso:', error);
     }
@@ -87,7 +129,12 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
 
   const navigateToLesson = (lesson: any) => {
     setActiveLesson(lesson);
-    // Expand the module containing this lesson
+    // Reset quiz state when changing lessons
+    setShowQuiz(false);
+    setQuiz([]);
+    setSelectedAnswers({});
+    setQuizSubmitted(false);
+
     if (course?.modules) {
       course.modules.forEach((mod: any, idx: number) => {
         if (mod.lessons?.some((l: any) => l.id === lesson.id)) {
@@ -101,10 +148,42 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
       const idx = allLessons.findIndex((l: any) => l.id === lesson.id);
       const newProgress = Math.max(enrollment.progress || 0, Math.round(((idx + 1) / allLessons.length) * 100));
       if (newProgress > (enrollment.progress || 0)) {
-        updateProgress(newProgress);
+        updateProgress(newProgress, lesson.id);
+      } else {
+        updateProgress(enrollment.progress, lesson.id);
       }
     }
   };
+
+  const handleGenerateQuiz = async () => {
+    if (!activeLesson || !token) return;
+    setQuizLoading(true);
+    setShowQuiz(true);
+    setQuizSubmitted(false);
+    setSelectedAnswers({});
+    try {
+      const data = await studentApi.generateQuiz(activeLesson.id, token);
+      setQuiz(data.questions || []);
+    } catch (error: any) {
+      toast.error(error.message || 'Error al generar quiz');
+      setShowQuiz(false);
+    } finally {
+      setQuizLoading(false);
+    }
+  };
+
+  const handleSelectAnswer = (questionIdx: number, optionIdx: number) => {
+    if (quizSubmitted) return;
+    setSelectedAnswers(prev => ({ ...prev, [questionIdx]: optionIdx }));
+  };
+
+  const handleSubmitQuiz = () => {
+    setQuizSubmitted(true);
+  };
+
+  const quizScore = quizSubmitted
+    ? quiz.reduce((acc, q, i) => acc + (selectedAnswers[i] === q.correctIndex ? 1 : 0), 0)
+    : 0;
 
   const audioBaseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:4000';
 
@@ -210,6 +289,98 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
                   <div className="markdown-content">
                     <ReactMarkdown>{activeLesson.content}</ReactMarkdown>
                   </div>
+
+                  {/* Quiz Section */}
+                  {enrollment && (
+                    <div className="mt-8 pt-6 border-t border-slate-700/50">
+                      {!showQuiz ? (
+                        <button
+                          onClick={handleGenerateQuiz}
+                          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-medium transition-all"
+                        >
+                          <Brain className="w-5 h-5" />
+                          Evaluar mi conocimiento
+                        </button>
+                      ) : quizLoading ? (
+                        <div className="flex items-center gap-3 py-8 justify-center">
+                          <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                          <span className="text-slate-300">Generando preguntas con IA...</span>
+                        </div>
+                      ) : quiz.length > 0 ? (
+                        <div className="space-y-6">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-bold flex items-center gap-2">
+                              <Brain className="w-5 h-5 text-purple-400" />
+                              Quiz de la leccion
+                            </h3>
+                            {quizSubmitted && (
+                              <div className="flex items-center gap-3">
+                                <span className={`text-sm font-bold ${quizScore >= quiz.length * 0.7 ? 'text-green-400' : quizScore >= quiz.length * 0.4 ? 'text-yellow-400' : 'text-red-400'}`}>
+                                  {quizScore}/{quiz.length} correctas
+                                </span>
+                                <button
+                                  onClick={handleGenerateQuiz}
+                                  className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-slate-600 text-slate-300 hover:border-purple-500/50 hover:text-white transition-all"
+                                >
+                                  <RotateCcw className="w-3 h-3" />
+                                  Nuevo quiz
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {quiz.map((q: any, qIdx: number) => (
+                            <div key={qIdx} className="glass rounded-xl p-5">
+                              <p className="font-medium mb-3 text-sm">
+                                <span className="text-purple-400 mr-2">{qIdx + 1}.</span>
+                                {q.question}
+                              </p>
+                              <div className="space-y-2">
+                                {q.options?.map((opt: string, oIdx: number) => {
+                                  const isSelected = selectedAnswers[qIdx] === oIdx;
+                                  const isCorrect = q.correctIndex === oIdx;
+                                  let optionStyle = 'border-slate-700 text-slate-300 hover:border-blue-500/40 hover:bg-slate-800/40';
+                                  if (quizSubmitted) {
+                                    if (isCorrect) optionStyle = 'border-green-500/50 bg-green-500/10 text-green-300';
+                                    else if (isSelected && !isCorrect) optionStyle = 'border-red-500/50 bg-red-500/10 text-red-300';
+                                    else optionStyle = 'border-slate-700/50 text-slate-500';
+                                  } else if (isSelected) {
+                                    optionStyle = 'border-blue-500 bg-blue-500/15 text-blue-300';
+                                  }
+
+                                  return (
+                                    <button
+                                      key={oIdx}
+                                      onClick={() => handleSelectAnswer(qIdx, oIdx)}
+                                      disabled={quizSubmitted}
+                                      className={`w-full text-left p-3 rounded-lg border text-sm transition-all flex items-center gap-3 ${optionStyle}`}
+                                    >
+                                      {quizSubmitted && isCorrect && <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />}
+                                      {quizSubmitted && isSelected && !isCorrect && <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />}
+                                      {!quizSubmitted && (
+                                        <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-slate-600'}`} />
+                                      )}
+                                      {opt}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+
+                          {!quizSubmitted && (
+                            <button
+                              onClick={handleSubmitQuiz}
+                              disabled={Object.keys(selectedAnswers).length < quiz.length}
+                              className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium transition-all"
+                            >
+                              Verificar respuestas ({Object.keys(selectedAnswers).length}/{quiz.length})
+                            </button>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
 
                 {/* Lesson Navigation */}

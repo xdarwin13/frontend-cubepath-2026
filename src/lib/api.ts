@@ -82,8 +82,10 @@ export const studentApi = {
     fetchApi(`/student/courses/${courseId}/enroll`, { method: 'POST', token }),
   getMyCourses: (token: string) =>
     fetchApi('/student/my-courses', { token }),
-  updateProgress: (enrollmentId: string, progress: number, token: string) =>
-    fetchApi(`/student/progress/${enrollmentId}`, { method: 'PUT', body: JSON.stringify({ progress }), token }),
+  updateProgress: (enrollmentId: string, progress: number, token: string, lastLessonId?: string) =>
+    fetchApi(`/student/progress/${enrollmentId}`, { method: 'PUT', body: JSON.stringify({ progress, lastLessonId }), token }),
+  generateQuiz: (lessonId: string, token: string) =>
+    fetchApi(`/student/quiz/lesson/${lessonId}`, { method: 'POST', token }),
 };
 
 // Admin
