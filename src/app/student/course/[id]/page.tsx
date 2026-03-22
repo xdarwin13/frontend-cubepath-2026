@@ -4,7 +4,7 @@ import { useState, useEffect, use, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { studentApi } from '@/lib/api';
 import DashboardLayout from '@/components/DashboardLayout';
-import { ArrowLeft, BookOpen, Loader2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Brain, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
+import { ArrowLeft, BookOpen, Loader2, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Brain, CheckCircle, XCircle, RotateCcw, Award } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -231,6 +231,15 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
                     <div className="h-2 rounded-full bg-slate-700 overflow-hidden">
                       <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-teal-500" style={{ width: `${enrollment.progress || 0}%` }} />
                     </div>
+                    {enrollment.progress >= 100 && (
+                      <Link
+                        href={`/student/certificate/${enrollment.id}`}
+                        className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white text-sm font-semibold transition-all hover:-translate-y-0.5 shadow-lg shadow-amber-500/20"
+                      >
+                        <Award className="w-4 h-4" />
+                        Ver Certificado
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>

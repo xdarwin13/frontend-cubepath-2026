@@ -86,6 +86,8 @@ export const studentApi = {
     fetchApi(`/student/progress/${enrollmentId}`, { method: 'PUT', body: JSON.stringify({ progress, lastLessonId }), token }),
   generateQuiz: (lessonId: string, token: string) =>
     fetchApi(`/student/quiz/lesson/${lessonId}`, { method: 'POST', token }),
+  getCertificate: (enrollmentId: string, token: string) =>
+    fetchApi(`/student/certificate/${enrollmentId}`, { token }),
 };
 
 // Admin
@@ -98,6 +100,12 @@ export const adminApi = {
     fetchApi('/admin/courses', { token }),
   getChartData: (token: string) =>
     fetchApi('/admin/stats/charts', { token }),
+};
+
+// Verify (public, no auth)
+export const verifyApi = {
+  verifyCertificate: (code: string) =>
+    fetchApi(`/verify/${code}`),
 };
 
 // AI
