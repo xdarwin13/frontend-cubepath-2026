@@ -206,7 +206,7 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
   return (
     <DashboardLayout allowedRole="student">
       <div className="animate-fade-in">
-        <Link href="/student" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors">
+        <Link href="/student/my-courses" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Volver a cursos
         </Link>
 

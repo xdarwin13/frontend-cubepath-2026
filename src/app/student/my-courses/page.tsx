@@ -48,8 +48,8 @@ export default function MyCoursesPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {enrollments.map((enrollment) => (
-              <div key={enrollment.id} className="card overflow-hidden group">
-                <Link href={`/student/course/${enrollment.course?.id}`} className="cursor-pointer">
+              <div key={enrollment.id} className="card overflow-hidden group flex flex-col">
+                <Link href={`/student/course/${enrollment.course?.id}`} className="cursor-pointer flex-1">
                   <div className="h-36 bg-gradient-to-br from-teal-700 to-teal-900 relative">
                     {enrollment.course?.coverImage && (
                       <img src={enrollment.course.coverImage} alt="" className="w-full h-full object-cover" />
@@ -72,8 +72,8 @@ export default function MyCoursesPage() {
                     </div>
                   </div>
                 </Link>
-                {enrollment.progress >= 100 && (
-                  <div className="px-5 pb-5">
+                <div className="px-5 pb-5">
+                  {enrollment.progress >= 100 ? (
                     <Link
                       href={`/student/certificate/${enrollment.id}`}
                       className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white text-sm font-semibold transition-all hover:-translate-y-0.5 shadow-lg shadow-amber-500/20"
@@ -81,8 +81,16 @@ export default function MyCoursesPage() {
                       <Award className="w-4 h-4" />
                       Ver Certificado
                     </Link>
-                  </div>
-                )}
+                  ) : (
+                    <Link
+                      href={`/student/course/${enrollment.course?.id}`}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-500 hover:to-teal-500 text-white text-sm font-semibold transition-all hover:-translate-y-0.5 shadow-lg shadow-blue-500/20"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      Continuar Curso
+                    </Link>
+                  )}
+                </div>
               </div>
             ))}
           </div>

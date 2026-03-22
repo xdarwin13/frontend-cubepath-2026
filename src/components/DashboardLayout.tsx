@@ -50,8 +50,8 @@ export default function DashboardLayout({ children, allowedRole }: { children: R
       gradient: 'from-[#06b6d4] to-[#0ea5e9]',
       glow: 'shadow-[0_0_20px_rgba(6,182,212,0.2)]',
       navItems: [
-        { href: '/student', label: 'Explorar Cursos', icon: BookOpen },
         { href: '/student/my-courses', label: 'Mis Cursos', icon: GraduationCap },
+        { href: '/student', label: 'Explorar Cursos', icon: BookOpen },
       ],
     },
     admin: {
