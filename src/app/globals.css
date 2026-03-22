@@ -393,6 +393,75 @@ body {
   .number-counter {
     font-variant-numeric: tabular-nums;
   }
+
+  /* ---- RICH TEXT EDITOR (TipTap) ---- */
+  .rich-editor .tiptap {
+    outline: none;
+    min-height: 300px;
+    padding: 1.25rem;
+    color: #cbd5e1;
+    line-height: 1.75;
+  }
+
+  .rich-editor .tiptap h1 { font-size: 1.75rem; font-weight: 700; margin: 1.5rem 0 1rem; color: white; }
+  .rich-editor .tiptap h2 { font-size: 1.375rem; font-weight: 600; margin: 1.25rem 0 0.75rem; color: white; }
+  .rich-editor .tiptap h3 { font-size: 1.125rem; font-weight: 600; margin: 1rem 0 0.5rem; color: #e2e8f0; }
+  .rich-editor .tiptap p { margin: 0.5rem 0; }
+  .rich-editor .tiptap ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.75rem 0; }
+  .rich-editor .tiptap ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.75rem 0; }
+  .rich-editor .tiptap li { margin: 0.25rem 0; }
+  .rich-editor .tiptap li p { margin: 0; }
+  .rich-editor .tiptap blockquote {
+    border-left: 3px solid #38bdf8;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #64748b;
+    font-style: italic;
+  }
+  .rich-editor .tiptap code {
+    background: rgba(56, 189, 248, 0.08);
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.1);
+  }
+  .rich-editor .tiptap pre {
+    background: rgba(5, 10, 24, 0.8);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border: 1px solid rgba(56, 189, 248, 0.08);
+  }
+  .rich-editor .tiptap pre code {
+    background: none;
+    padding: 0;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.875rem;
+  }
+  .rich-editor .tiptap strong { color: #e2e8f0; }
+  .rich-editor .tiptap a { color: #38bdf8; text-decoration: underline; cursor: pointer; }
+  .rich-editor .tiptap img {
+    max-width: 100%;
+    border-radius: 0.75rem;
+    margin: 1rem auto;
+    display: block;
+    border: 1px solid rgba(56, 189, 248, 0.08);
+  }
+  .rich-editor .tiptap hr {
+    border: none;
+    border-top: 1px solid rgba(56, 189, 248, 0.1);
+    margin: 1.5rem 0;
+  }
+  .rich-editor .tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: #3b4563;
+    pointer-events: none;
+    height: 0;
+  }
 }
 
 /* ========== KEYFRAMES ========== */

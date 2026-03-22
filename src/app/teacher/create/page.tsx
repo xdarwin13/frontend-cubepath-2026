@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { aiApi, teacherApi } from '@/lib/api';
 import DashboardLayout from '@/components/DashboardLayout';
+import RichTextEditor from '@/components/RichTextEditor';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader2, BookOpen, ArrowRight, Eye, Check, ChevronDown, ChevronUp, CheckCircle, XCircle, Wand2, Volume2 } from 'lucide-react';
+import { Sparkles, Loader2, BookOpen, ArrowRight, Eye, Check, ChevronDown, ChevronUp, CheckCircle, XCircle, Wand2, Volume2, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function CreateCoursePage() {
@@ -20,6 +21,8 @@ export default function CreateCoursePage() {
   const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set());
   const [generatingContent, setGeneratingContent] = useState<Set<string>>(new Set());
   const [generatingAudio, setGeneratingAudio] = useState<Set<string>>(new Set());
+  const [editingLesson, setEditingLesson] = useState<string | null>(null);
+  const [savingLesson, setSavingLesson] = useState<Set<string>>(new Set());
 
   const hasContent = (lesson: any) => lesson.content && lesson.content.length > 100;
   const hasAudio = (lesson: any) => !!lesson.audioUrl;
@@ -70,6 +73,35 @@ export default function CreateCoursePage() {
       setGeneratingAudio(prev => { const n = new Set(prev); n.delete(lessonId); return n; });
     }
   };
+
+  const saveLessonContent = useCallback(async (lessonId: string, markdown: string) => {
+    setSavingLesson(prev => new Set(prev).add(lessonId));
+    try {
+      await teacherApi.updateLesson(lessonId, { content: markdown }, token!);
+      setCourse((prev: any) => {
+        const updated = { ...prev };
+        updated.modules = updated.modules.map((m: any) => ({
+          ...m,
+          lessons: m.lessons.map((l: any) => l.id === lessonId ? { ...l, content: markdown } : l),
+        }));
+        return updated;
+      });
+      toast.success('Contenido guardado!');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al guardar');
+    } finally {
+      setSavingLesson(prev => { const n = new Set(prev); n.delete(lessonId); return n; });
+    }
+  }, [token]);
+
+  const handleSearchImages = useCallback(async (query: string) => {
+    const data = await aiApi.searchImages(query, token!);
+    const photos = data.photos || data.results || [];
+    return photos.map((p: any) => ({
+      src: p.src?.medium || p.src?.small || p.url || p.src,
+      alt: p.alt || p.photographer || query,
+    }));
+  }, [token]);
 
   const publishCourse = async () => {
     setPublishing(true);
@@ -300,6 +332,21 @@ export default function CreateCoursePage() {
                                       {generatingContent.has(lesson.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
                                       {hasContent(lesson) ? 'Regenerar Texto' : 'Generar Texto'}
                                     </motion.button>
+                                    {hasContent(lesson) && (
+                                      <motion.button
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.97 }}
+                                        onClick={() => setEditingLesson(editingLesson === lesson.id ? null : lesson.id)}
+                                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
+                                          editingLesson === lesson.id
+                                            ? 'border-[#a78bfa]/30 text-[#a78bfa] bg-[#a78bfa]/10'
+                                            : 'border-[#a78bfa]/20 text-[#a78bfa] hover:bg-[#a78bfa]/10'
+                                        }`}
+                                      >
+                                        <Pencil className="w-3 h-3" />
+                                        {editingLesson === lesson.id ? 'Cerrar Editor' : 'Editar'}
+                                      </motion.button>
+                                    )}
                                     <motion.button
                                       whileHover={{ scale: 1.03 }}
                                       whileTap={{ scale: 0.97 }}
@@ -313,6 +360,28 @@ export default function CreateCoursePage() {
                                     </motion.button>
                                   </div>
                                 </div>
+
+                                {/* Editor de contenido */}
+                                <AnimatePresence>
+                                  {editingLesson === lesson.id && hasContent(lesson) && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: 'auto', opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.3 }}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="mt-2">
+                                        <RichTextEditor
+                                          content={lesson.content}
+                                          onSave={(md) => saveLessonContent(lesson.id, md)}
+                                          saving={savingLesson.has(lesson.id)}
+                                          onSearchImages={handleSearchImages}
+                                        />
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
                               </motion.div>
                             ))}
                           </div>

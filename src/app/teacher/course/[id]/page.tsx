@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { teacherApi, aiApi } from '@/lib/api';
 import DashboardLayout from '@/components/DashboardLayout';
-import { ArrowLeft, Sparkles, Loader2, ChevronDown, ChevronUp, Eye, CheckCircle, XCircle, Volume2 } from 'lucide-react';
+import RichTextEditor from '@/components/RichTextEditor';
+import { ArrowLeft, Sparkles, Loader2, ChevronDown, ChevronUp, Eye, CheckCircle, XCircle, Volume2, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -16,6 +17,8 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
   const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set([0]));
   const [generatingContent, setGeneratingContent] = useState<Set<string>>(new Set());
   const [generatingAudio, setGeneratingAudio] = useState<Set<string>>(new Set());
+  const [editingLesson, setEditingLesson] = useState<string | null>(null);
+  const [savingLesson, setSavingLesson] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (token) loadCourse();
@@ -75,6 +78,35 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
       toast.error(error.message);
     }
   };
+
+  const saveLessonContent = useCallback(async (lessonId: string, markdown: string) => {
+    setSavingLesson(prev => new Set(prev).add(lessonId));
+    try {
+      await teacherApi.updateLesson(lessonId, { content: markdown }, token!);
+      setCourse((prev: any) => {
+        const updated = { ...prev };
+        updated.modules = updated.modules.map((m: any) => ({
+          ...m,
+          lessons: m.lessons.map((l: any) => l.id === lessonId ? { ...l, content: markdown } : l),
+        }));
+        return updated;
+      });
+      toast.success('Contenido guardado!');
+    } catch (error: any) {
+      toast.error(error.message || 'Error al guardar');
+    } finally {
+      setSavingLesson(prev => { const n = new Set(prev); n.delete(lessonId); return n; });
+    }
+  }, [token]);
+
+  const handleSearchImages = useCallback(async (query: string) => {
+    const data = await aiApi.searchImages(query, token!);
+    const photos = data.photos || data.results || [];
+    return photos.map((p: any) => ({
+      src: p.src?.medium || p.src?.small || p.url || p.src,
+      alt: p.alt || p.photographer || query,
+    }));
+  }, [token]);
 
   const toggleModule = (idx: number) => {
     setExpandedModules(prev => {
@@ -145,41 +177,67 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
               {expandedModules.has(idx) && (
                 <div className="border-t border-slate-700/50 p-4 space-y-3">
                   {mod.lessons?.map((lesson: any, lIdx: number) => (
-                    <div key={lesson.id} className="flex flex-col sm:flex-row sm:items-start justify-between p-3 rounded-lg bg-slate-800/30 gap-3">
-                      <div className="flex items-start gap-3 flex-1 min-w-0">
-                        <span className="text-xs text-slate-500 mt-1">{lIdx + 1}.</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate sm:whitespace-normal">{lesson.title}</p>
-                          <div className="flex items-center gap-3 mt-1.5">
-                            <span className={`inline-flex items-center gap-1 text-xs ${hasContent(lesson) ? 'text-emerald-400' : 'text-slate-500'}`}>
-                              {hasContent(lesson) ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                              {hasContent(lesson) ? 'Texto listo' : 'Sin texto'}
-                            </span>
-                            <span className={`inline-flex items-center gap-1 text-xs ${hasAudio(lesson) ? 'text-emerald-400' : 'text-slate-500'}`}>
-                              {hasAudio(lesson) ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                              {hasAudio(lesson) ? 'Audio listo' : 'Sin audio'}
-                            </span>
+                    <div key={lesson.id} className="p-3 rounded-lg bg-slate-800/30 space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <span className="text-xs text-slate-500 mt-1">{lIdx + 1}.</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate sm:whitespace-normal">{lesson.title}</p>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <span className={`inline-flex items-center gap-1 text-xs ${hasContent(lesson) ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {hasContent(lesson) ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                {hasContent(lesson) ? 'Texto listo' : 'Sin texto'}
+                              </span>
+                              <span className={`inline-flex items-center gap-1 text-xs ${hasAudio(lesson) ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                {hasAudio(lesson) ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                {hasAudio(lesson) ? 'Audio listo' : 'Sin audio'}
+                              </span>
+                            </div>
                           </div>
                         </div>
+                        <div className="flex gap-2 shrink-0 self-start">
+                          <button
+                            onClick={() => generateLessonContent(lesson.id)}
+                            disabled={generatingContent.has(lesson.id)}
+                            className="text-xs px-3 py-1.5 rounded-lg border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 transition-all disabled:opacity-50 flex items-center gap-1"
+                          >
+                            {generatingContent.has(lesson.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                            {hasContent(lesson) ? 'Regenerar' : 'Generar'} Texto
+                          </button>
+                          {hasContent(lesson) && (
+                            <button
+                              onClick={() => setEditingLesson(editingLesson === lesson.id ? null : lesson.id)}
+                              className={`text-xs px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1 ${
+                                editingLesson === lesson.id
+                                  ? 'border-[#a78bfa]/30 text-[#a78bfa] bg-[#a78bfa]/10'
+                                  : 'border-[#a78bfa]/20 text-[#a78bfa] hover:bg-[#a78bfa]/10'
+                              }`}
+                            >
+                              <Pencil className="w-3 h-3" />
+                              {editingLesson === lesson.id ? 'Cerrar' : 'Editar'}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => generateAudio(lesson.id)}
+                            disabled={generatingAudio.has(lesson.id) || !hasContent(lesson)}
+                            className="text-xs px-3 py-1.5 rounded-lg border border-teal-500/30 text-teal-400 hover:bg-teal-500/10 transition-all disabled:opacity-50 flex items-center gap-1"
+                          >
+                            {generatingAudio.has(lesson.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Volume2 className="w-3 h-3" />}
+                            {hasAudio(lesson) ? 'Regenerar' : 'Generar'} Audio
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex gap-2 shrink-0 self-start">
-                        <button
-                          onClick={() => generateLessonContent(lesson.id)}
-                          disabled={generatingContent.has(lesson.id)}
-                          className="text-xs px-3 py-1.5 rounded-lg border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 transition-all disabled:opacity-50 flex items-center gap-1"
-                        >
-                          {generatingContent.has(lesson.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-                          {hasContent(lesson) ? 'Regenerar' : 'Generar'} Texto
-                        </button>
-                        <button
-                          onClick={() => generateAudio(lesson.id)}
-                          disabled={generatingAudio.has(lesson.id) || !hasContent(lesson)}
-                          className="text-xs px-3 py-1.5 rounded-lg border border-teal-500/30 text-teal-400 hover:bg-teal-500/10 transition-all disabled:opacity-50 flex items-center gap-1"
-                        >
-                          {generatingAudio.has(lesson.id) ? <Loader2 className="w-3 h-3 animate-spin" /> : <Volume2 className="w-3 h-3" />}
-                          {hasAudio(lesson) ? 'Regenerar' : 'Generar'} Audio
-                        </button>
-                      </div>
+
+                      {editingLesson === lesson.id && hasContent(lesson) && (
+                        <div className="mt-2">
+                          <RichTextEditor
+                            content={lesson.content}
+                            onSave={(md) => saveLessonContent(lesson.id, md)}
+                            saving={savingLesson.has(lesson.id)}
+                            onSearchImages={handleSearchImages}
+                          />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
