@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import NextImage from 'next/image';
+import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import {
@@ -28,6 +29,15 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { REGISTRATION_DISABLED } from '@/lib/config';
+
+const BrainModel = dynamic(() => import('@/components/BrainModel'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full min-h-[400px] flex items-center justify-center">
+      <div className="w-24 h-24 rounded-full border-2 border-[#38bdf8]/30 border-t-[#38bdf8] animate-spin" />
+    </div>
+  ),
+});
 
 /* ========== ANIMATED COUNTER ========== */
 function AnimatedCounter({ value, suffix = '' }: { value: string; suffix?: string }) {
@@ -492,7 +502,7 @@ export default function LandingPage() {
             transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative flex justify-center lg:justify-end z-10 lg:-mr-24 xl:-mr-32 mt-12 lg:mt-0"
           >
-            <div className="relative w-full sm:w-[125%] lg:w-[135%] max-w-[950px]">
+            <div className="relative w-[600px] h-[600px] mx-auto">
               {/* Animated glow rings */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] border border-[#38bdf8]/5 rounded-full" style={{ animation: 'spinSlow 20s linear infinite', willChange: 'transform' }} />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] h-[75%] border border-[#818cf8]/5 rounded-full hidden md:block" style={{ animation: 'spinSlow 30s linear infinite reverse', willChange: 'transform' }} />
@@ -501,18 +511,14 @@ export default function LandingPage() {
               {/* Main glow */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-gradient-to-br from-[#38bdf8] to-[#818cf8] opacity-[0.06] blur-[60px] md:blur-[100px] rounded-full" style={{ animation: 'morphBlob 10s ease-in-out infinite', willChange: 'transform, border-radius', contain: 'layout style paint' as any }} />
 
-              <NextImage
-                src="/cerebro.png"
-                alt="Cerebro Inteligencia Artificial"
-                width={1000}
-                height={800}
-                className="w-full h-auto object-contain animate-float-slow mix-blend-screen opacity-[0.85] filter drop-shadow-[0_0_30px_rgba(56,189,248,0.25)]"
-                priority
-              />
+              {/* 3D Brain Model */}
+              <div className="absolute inset-0 z-10">
+                <BrainModel />
+              </div>
 
               {/* Orbiting dots */}
-              <div className="absolute top-1/2 left-1/2 w-3 h-3 rounded-full bg-[#38bdf8] shadow-[0_0_15px_rgba(56,189,248,0.6)]" style={{ animation: 'orbit 8s linear infinite', willChange: 'transform' }} />
-              <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-[#818cf8] shadow-[0_0_15px_rgba(129,140,248,0.6)] hidden md:block" style={{ animation: 'orbit 12s linear infinite reverse', willChange: 'transform' }} />
+              <div className="absolute top-1/2 left-1/2 w-3 h-3 rounded-full bg-[#38bdf8] shadow-[0_0_15px_rgba(56,189,248,0.6)] z-20" style={{ animation: 'orbit 8s linear infinite', willChange: 'transform' }} />
+              <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-[#818cf8] shadow-[0_0_15px_rgba(129,140,248,0.6)] hidden md:block z-20" style={{ animation: 'orbit 12s linear infinite reverse', willChange: 'transform' }} />
             </div>
           </motion.div>
         </motion.section>
