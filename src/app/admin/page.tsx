@@ -5,14 +5,14 @@ import { useAuth } from '@/lib/auth';
 import { adminApi } from '@/lib/api';
 import DashboardLayout from '@/components/DashboardLayout';
 import { motion } from 'framer-motion';
-import { Users, BookOpen, GraduationCap, BarChart3, Loader2, TrendingUp, Activity } from 'lucide-react';
+import { Users, BookOpen, GraduationCap, BarChart3, TrendingUp, Activity, Award, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement,
   Title, Tooltip, Legend, Filler,
 } from 'chart.js';
-import { Line, Doughnut } from 'react-chartjs-2';
+import { Line, Doughnut, Bar } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, Filler);
 
@@ -60,6 +60,8 @@ export default function AdminDashboard() {
     { label: 'Cursos', value: stats?.totalCourses || 0, icon: BarChart3, color: 'from-[#10b981] to-[#059669]', glow: 'rgba(16,185,129,0.15)' },
     { label: 'Publicados', value: stats?.publishedCourses || 0, icon: TrendingUp, color: 'from-[#ec4899] to-[#f43f5e]', glow: 'rgba(244,63,94,0.15)' },
     { label: 'Inscripciones', value: stats?.totalEnrollments || 0, icon: Activity, color: 'from-[#8b5cf6] to-[#7c3aed]', glow: 'rgba(139,92,246,0.15)' },
+    { label: 'Completados', value: stats?.completedEnrollments || 0, icon: CheckCircle2, color: 'from-[#22c55e] to-[#16a34a]', glow: 'rgba(34,197,94,0.15)' },
+    { label: 'Certificados', value: stats?.totalCertificates || 0, icon: Award, color: 'from-[#eab308] to-[#ca8a04]', glow: 'rgba(234,179,8,0.15)' },
   ];
 
   const registrationsData = {
@@ -81,11 +83,27 @@ export default function AdminDashboard() {
     }],
   };
 
+  const enrollmentsPerDayData = {
+    labels: charts?.enrollmentsPerDay?.map((d: any) => {
+      const date = new Date(d.date);
+      return `${date.getDate()}/${date.getMonth() + 1}`;
+    }) || [],
+    datasets: [{
+      label: 'Inscripciones',
+      data: charts?.enrollmentsPerDay?.map((d: any) => parseInt(d.count)) || [],
+      backgroundColor: 'rgba(139, 92, 246, 0.6)',
+      borderColor: '#8b5cf6',
+      borderWidth: 2,
+      borderRadius: 6,
+      hoverBackgroundColor: 'rgba(139, 92, 246, 0.8)',
+    }],
+  };
+
   const categoryData = {
     labels: charts?.coursesByCategory?.map((c: any) => c.category) || [],
     datasets: [{
       data: charts?.coursesByCategory?.map((c: any) => parseInt(c.count)) || [],
-      backgroundColor: ['#3b82f6', '#06b6d4', '#f97316', '#10b981', '#ef4444', '#8b5cf6'],
+      backgroundColor: ['#3b82f6', '#06b6d4', '#f97316', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#eab308'],
       borderWidth: 0,
       borderRadius: 4,
     }],
@@ -111,6 +129,17 @@ export default function AdminDashboard() {
     },
   };
 
+  const barChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#64748b', font: { family: 'Inter' } } },
+    },
+    scales: {
+      x: { ticks: { color: '#475569' }, grid: { color: 'rgba(148, 163, 184, 0.05)' } },
+      y: { ticks: { color: '#475569', stepSize: 1 }, grid: { color: 'rgba(148, 163, 184, 0.05)' }, beginAtZero: true },
+    },
+  };
+
   const doughnutOptions = {
     responsive: true,
     plugins: {
@@ -127,13 +156,13 @@ export default function AdminDashboard() {
         </motion.div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4 mb-8">
           {statCards.map((card, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
+              transition={{ delay: i * 0.04 }}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
               className="glass-card rounded-xl p-4"
             >
@@ -146,8 +175,8 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Charts */}
-        <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+        {/* Charts Row 1 */}
+        <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mb-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card rounded-xl p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-[#38bdf8]" /> Registros por Día</h3>
             {charts?.registrationsPerDay?.length > 0 ? (
@@ -157,6 +186,18 @@ export default function AdminDashboard() {
             )}
           </motion.div>
 
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="glass-card rounded-xl p-6">
+            <h3 className="font-bold mb-4 flex items-center gap-2"><Activity className="w-4 h-4 text-[#8b5cf6]" /> Inscripciones por Día</h3>
+            {charts?.enrollmentsPerDay?.length > 0 ? (
+              <Bar data={enrollmentsPerDayData} options={barChartOptions} />
+            ) : (
+              <p className="text-slate-500 text-center py-12">Sin datos de inscripciones aún</p>
+            )}
+          </motion.div>
+        </div>
+
+        {/* Charts Row 2 */}
+        <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-card rounded-xl p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2"><BarChart3 className="w-4 h-4 text-[#818cf8]" /> Cursos por Categoría</h3>
             {charts?.coursesByCategory?.length > 0 ? (
@@ -166,7 +207,7 @@ export default function AdminDashboard() {
             )}
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-card rounded-xl p-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="glass-card rounded-xl p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2"><Users className="w-4 h-4 text-[#06b6d4]" /> Distribución de Roles</h3>
             {charts?.roleDistribution?.length > 0 ? (
               <div className="max-w-xs mx-auto"><Doughnut data={roleData} options={doughnutOptions} /></div>
@@ -175,7 +216,7 @@ export default function AdminDashboard() {
             )}
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="glass-card rounded-xl p-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-card rounded-xl p-6">
             <h3 className="font-bold mb-4 flex items-center gap-2"><GraduationCap className="w-4 h-4 text-[#f97316]" /> Top Profesores</h3>
             {charts?.topTeachers?.length > 0 ? (
               <div className="space-y-3">
@@ -184,11 +225,11 @@ export default function AdminDashboard() {
                     key={i}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.7 + i * 0.05 }}
+                    transition={{ delay: 0.55 + i * 0.05 }}
                     className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-slate-700/30 hover:border-slate-600/40 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#3b82f6] to-[#06b6d4] flex items-center justify-center text-xs font-bold text-white">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white ${i === 0 ? 'bg-gradient-to-br from-yellow-500 to-amber-600' : i === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500' : i === 2 ? 'bg-gradient-to-br from-orange-600 to-orange-800' : 'bg-gradient-to-br from-[#3b82f6] to-[#06b6d4]'}`}>
                         {i + 1}
                       </div>
                       <span className="text-sm">{t.teacher?.name || 'Profesor'}</span>

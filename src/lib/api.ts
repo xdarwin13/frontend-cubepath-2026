@@ -94,10 +94,37 @@ export const studentApi = {
 export const adminApi = {
   getStats: (token: string) =>
     fetchApi('/admin/stats', { token }),
-  getUsers: (token: string, role?: string) =>
-    fetchApi(`/admin/users${role ? `?role=${role}` : ''}`, { token }),
-  getCourses: (token: string) =>
-    fetchApi('/admin/courses', { token }),
+  getUsers: (token: string, role?: string, search?: string) => {
+    const params = new URLSearchParams();
+    if (role) params.set('role', role);
+    if (search) params.set('search', search);
+    const qs = params.toString();
+    return fetchApi(`/admin/users${qs ? `?${qs}` : ''}`, { token });
+  },
+  updateUserRole: (id: string, role: string, token: string) =>
+    fetchApi(`/admin/users/${id}/role`, { method: 'PUT', body: JSON.stringify({ role }), token }),
+  deleteUser: (id: string, token: string) =>
+    fetchApi(`/admin/users/${id}`, { method: 'DELETE', token }),
+  getCourses: (token: string, search?: string, status?: string, category?: string) => {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (status) params.set('status', status);
+    if (category) params.set('category', category);
+    const qs = params.toString();
+    return fetchApi(`/admin/courses${qs ? `?${qs}` : ''}`, { token });
+  },
+  toggleCourseStatus: (id: string, token: string) =>
+    fetchApi(`/admin/courses/${id}/status`, { method: 'PUT', token }),
+  deleteCourse: (id: string, token: string) =>
+    fetchApi(`/admin/courses/${id}`, { method: 'DELETE', token }),
+  getEnrollments: (token: string, search?: string) => {
+    const qs = search ? `?search=${encodeURIComponent(search)}` : '';
+    return fetchApi(`/admin/enrollments${qs}`, { token });
+  },
+  getCertificates: (token: string, search?: string) => {
+    const qs = search ? `?search=${encodeURIComponent(search)}` : '';
+    return fetchApi(`/admin/certificates${qs}`, { token });
+  },
   getChartData: (token: string) =>
     fetchApi('/admin/stats/charts', { token }),
 };

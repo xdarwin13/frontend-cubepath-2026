@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import NextImage from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, LogOut, Home, BarChart3, GraduationCap, Users, Sparkles, Menu, X } from 'lucide-react';
+import { BookOpen, LogOut, Home, BarChart3, GraduationCap, Users, Sparkles, Menu, X, ClipboardList, Award } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function DashboardLayout({ children, allowedRole }: { children: React.ReactNode; allowedRole: string }) {
@@ -63,6 +63,8 @@ export default function DashboardLayout({ children, allowedRole }: { children: R
         { href: '/admin', label: 'Dashboard', icon: BarChart3 },
         { href: '/admin/users', label: 'Usuarios', icon: Users },
         { href: '/admin/courses', label: 'Cursos', icon: BookOpen },
+        { href: '/admin/enrollments', label: 'Inscripciones', icon: ClipboardList },
+        { href: '/admin/certificates', label: 'Certificados', icon: Award },
       ],
     },
   };

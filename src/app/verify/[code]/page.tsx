@@ -43,8 +43,8 @@ export default function VerifyCertificatePage({ params }: { params: Promise<{ co
       {/* Header */}
       <header className="border-b border-slate-800/50 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="EduCubeIA" width={36} height={36} className="rounded-lg" />
+          <Link href="/" className="flex items-center gap-0.5">
+            <Image src="/logo.png" alt="EduCubeIA" width={44} height={44} className="h-10 w-10 object-contain scale-125" />
             <span className="text-lg font-bold gradient-text">EduCubeIA</span>
           </Link>
           <div className="flex items-center gap-2 text-slate-400 text-sm">
