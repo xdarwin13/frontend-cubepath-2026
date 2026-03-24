@@ -20,6 +20,11 @@ import {
   ChevronRight,
   Menu,
   X,
+  Mail,
+  Github,
+  Twitter,
+  Linkedin,
+  Heart,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { REGISTRATION_DISABLED } from '@/lib/config';
@@ -713,15 +718,132 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/30 px-6 py-10 relative z-10">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-[#38bdf8]/50" />
-            <span className="font-semibold text-slate-500 tracking-tight">EduCubeIA</span>
+      <footer className="relative z-10 border-t border-slate-800/30">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050a18] to-[#030712] pointer-events-none" />
+        <div className="relative mx-auto max-w-7xl px-6 pt-16 pb-8">
+          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4 mb-12">
+            {/* Brand */}
+            <div className="lg:col-span-1">
+              <Link href="/" className="flex items-center gap-1 mb-4 group w-fit">
+                <NextImage
+                  src="/logo.png"
+                  alt="Logo EduCubeIA"
+                  width={44}
+                  height={44}
+                  className="h-10 w-10 object-contain scale-125 -mr-1"
+                />
+                <span className="text-lg font-bold tracking-tight gradient-text">EduCubeIA</span>
+              </Link>
+              <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-xs">
+                Plataforma educativa potenciada por inteligencia artificial. Transforma la forma en que enseñas y aprendes.
+              </p>
+              <div className="flex items-center gap-3">
+                {[
+                  { icon: Twitter, href: '#', label: 'Twitter' },
+                  { icon: Github, href: '#', label: 'GitHub' },
+                  { icon: Linkedin, href: '#', label: 'LinkedIn' },
+                  { icon: Mail, href: 'mailto:contacto@educubeia.com', label: 'Email' },
+                ].map(({ icon: Icon, href, label }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 transition-all hover:bg-[#38bdf8]/10 hover:border-[#38bdf8]/30 hover:text-[#38bdf8] hover:shadow-[0_0_12px_rgba(56,189,248,0.15)]"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Plataforma */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Plataforma</h4>
+              <ul className="space-y-3">
+                {[
+                  { label: 'Características', href: '#features' },
+                  { label: 'Cómo Funciona', href: '#how-it-works' },
+                  { label: 'Para Profesores', href: '#roles' },
+                  { label: 'Para Estudiantes', href: '#roles' },
+                ].map(({ label, href }) => (
+                  <li key={label}>
+                    <a href={href} className="text-sm text-slate-400 hover:text-[#38bdf8] transition-colors flex items-center gap-2 group">
+                      <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-[#38bdf8] transition-colors" />
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Recursos */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Recursos</h4>
+              <ul className="space-y-3">
+                {[
+                  { label: 'Documentación', href: '#' },
+                  { label: 'Guía de Inicio', href: '#' },
+                  { label: 'API Reference', href: '#' },
+                  { label: 'Soporte', href: '#' },
+                ].map(({ label, href }) => (
+                  <li key={label}>
+                    <a href={href} className="text-sm text-slate-400 hover:text-[#38bdf8] transition-colors flex items-center gap-2 group">
+                      <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-[#38bdf8] transition-colors" />
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contacto */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Contacto</h4>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-2.5 text-sm text-slate-400">
+                  <Mail className="w-4 h-4 text-[#38bdf8]/50 shrink-0" />
+                  contacto@educubeia.com
+                </li>
+                <li className="flex items-center gap-2.5 text-sm text-slate-400">
+                  <Globe className="w-4 h-4 text-[#38bdf8]/50 shrink-0" />
+                  www.educubeia.com
+                </li>
+              </ul>
+              <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-[#38bdf8]/5 to-[#818cf8]/5 border border-[#38bdf8]/10">
+                <p className="text-xs text-slate-400 mb-3">Mantente al día con las novedades</p>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="tu@email.com"
+                    className="flex-1 min-w-0 px-3 py-2 text-xs rounded-lg bg-slate-800/60 border border-slate-700/50 text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-[#38bdf8]/40 transition-colors"
+                  />
+                  <button className="px-3 py-2 text-xs font-medium rounded-lg bg-gradient-to-r from-[#38bdf8] to-[#818cf8] text-white shrink-0 hover:shadow-[0_0_15px_rgba(56,189,248,0.3)] transition-shadow">
+                    Enviar
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="text-sm text-slate-600">
-            &copy; {new Date().getFullYear()} EduCubeIA. Todos los derechos reservados.
-          </p>
+
+          {/* Divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent mb-8" />
+
+          {/* Bottom bar */}
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p className="text-xs text-slate-600">
+              &copy; {new Date().getFullYear()} EduCubeIA. Todos los derechos reservados.
+            </p>
+            <div className="flex items-center gap-1 text-xs text-slate-600">
+              Hecho con <Heart className="w-3 h-3 text-rose-500/70 mx-0.5" /> para la educación del futuro
+            </div>
+            <div className="flex items-center gap-4">
+              {['Privacidad', 'Términos', 'Cookies'].map((item) => (
+                <a key={item} href="#" className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
+                  {item}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </footer>
     </div>
