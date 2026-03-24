@@ -49,14 +49,19 @@ export default function Certificate({ data }: CertificateProps) {
     const { jsPDF } = await import('jspdf');
 
     const canvas = await html2canvas(certRef.current, {
-      scale: 3,
+      scale: 2,
       useCORS: true,
       backgroundColor: null,
     });
 
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
-    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+
+    const pxToMm = 25.4 / 96;
+    const pageW = (canvas.width / 2) * pxToMm;
+    const pageH = (canvas.height / 2) * pxToMm;
+
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [pageW, pageH] });
+    pdf.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
     pdf.save(`certificado-${data.courseTitle.replace(/\s+/g, '-').toLowerCase()}.pdf`);
   };
 
@@ -112,9 +117,9 @@ export default function Certificate({ data }: CertificateProps) {
         <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '24px 50px', textAlign: 'center' }}>
 
           {/* Logo + Platform name */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 2 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="EduCubeIA" style={{ width: 38, height: 38, borderRadius: 8 }} />
+            <img src="/logo.png" alt="EduCubeIA" style={{ width: 48, height: 48, borderRadius: 8, marginRight: -6 }} />
             <span style={{ fontSize: 22, fontWeight: 800, color: '#38bdf8', letterSpacing: '-0.5px' }}>
               EduCubeIA
             </span>
@@ -160,7 +165,7 @@ export default function Certificate({ data }: CertificateProps) {
                 Fecha de emisión
               </p>
               <p style={{ color: '#e2e8f0', fontSize: 13, fontWeight: 600 }}>{formatDate(data.completedAt)}</p>
-              <div style={{ marginTop: 8, width: 150, height: 1, background: 'rgba(56, 189, 248, 0.3)' }} />
+              <div style={{ marginTop: 8, width: '100%', height: 2, borderRadius: 1, background: 'rgba(56, 189, 248, 0.3)' }} />
             </div>
 
             {/* QR Code */}
@@ -192,7 +197,7 @@ export default function Certificate({ data }: CertificateProps) {
               <p style={{ color: '#38bdf8', fontSize: 13, fontWeight: 700, fontFamily: 'monospace', letterSpacing: 1 }}>
                 {data.verificationCode}
               </p>
-              <div style={{ marginTop: 8, width: 150, height: 1, background: 'rgba(129, 140, 248, 0.3)', marginLeft: 'auto' }} />
+              <div style={{ marginTop: 8, width: '100%', height: 2, borderRadius: 1, background: 'rgba(129, 140, 248, 0.3)' }} />
             </div>
           </div>
         </div>
