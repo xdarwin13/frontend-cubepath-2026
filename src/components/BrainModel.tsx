@@ -52,7 +52,7 @@ export default function BrainModel() {
   const handleLoaded = useCallback(() => setLoaded(true), []);
 
   return (
-    <div style={{ width: 600, height: 600 }} className="relative mx-auto">
+    <div className="relative mx-auto w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[600px] lg:h-[600px]">
       {!loaded && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="w-20 h-20 rounded-full border-2 border-[#38bdf8]/20 border-t-[#38bdf8] animate-spin" />
