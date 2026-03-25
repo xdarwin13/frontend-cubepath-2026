@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
+import Youtube from '@tiptap/extension-youtube';
 import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
 import { useState, useCallback, useEffect } from 'react';
@@ -20,6 +21,57 @@ const turndown = new TurndownService({
   headingStyle: 'atx',
   codeBlockStyle: 'fenced',
   bulletListMarker: '-',
+});
+
+function extractYouTubeVideoId(url: string): string | null {
+  try {
+    const normalizedUrl = url.startsWith('//') ? `https:${url}` : url;
+    const parsed = new URL(normalizedUrl);
+    const hostname = parsed.hostname.replace(/^www\./, '');
+
+    if (hostname === 'youtu.be') {
+      const id = parsed.pathname.slice(1);
+      return id || null;
+    }
+
+    if (
+      hostname === 'youtube.com' ||
+      hostname === 'm.youtube.com' ||
+      hostname === 'music.youtube.com' ||
+      hostname === 'youtube-nocookie.com'
+    ) {
+      if (parsed.pathname === '/watch') {
+        return parsed.searchParams.get('v');
+      }
+
+      const pathSegments = parsed.pathname.split('/').filter(Boolean);
+      if (pathSegments[0] === 'shorts' || pathSegments[0] === 'embed') {
+        return pathSegments[1] || null;
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function isYouTubeUrl(url: string): boolean {
+  return !!extractYouTubeVideoId(url);
+}
+
+turndown.addRule('youtubeIframeToUrl', {
+  filter: (node) => {
+    if (node.nodeName !== 'IFRAME') return false;
+    const src = (node as HTMLElement).getAttribute('src');
+    return !!(src && isYouTubeUrl(src));
+  },
+  replacement: (_content, node) => {
+    const src = (node as HTMLElement).getAttribute('src') || '';
+    const id = extractYouTubeVideoId(src);
+    const watchUrl = id ? `https://www.youtube.com/watch?v=${id}` : src;
+    return `\n\n[${watchUrl}](${watchUrl})\n\n`;
+  },
 });
 
 function markdownToHtml(md: string): string {
@@ -224,6 +276,12 @@ export default function RichTextEditor({ content, onSave, saving, onSearchImages
         openOnClick: false,
         HTMLAttributes: { class: 'text-[#38bdf8] underline cursor-pointer' },
       }),
+      Youtube.configure({
+        controls: true,
+        nocookie: true,
+        width: 640,
+        height: 360,
+      }),
       Underline,
       Placeholder.configure({
         placeholder: 'Escribe el contenido de la lección aquí...',
@@ -234,6 +292,13 @@ export default function RichTextEditor({ content, onSave, saving, onSearchImages
     editorProps: {
       attributes: {
         class: 'prose prose-invert max-w-none outline-none min-h-[300px] p-5',
+      },
+      handlePaste: (_view, event) => {
+        const pastedText = event.clipboardData?.getData('text/plain')?.trim();
+        if (!pastedText || !isYouTubeUrl(pastedText) || !editor) return false;
+
+        editor.chain().focus().setYoutubeVideo({ src: pastedText }).run();
+        return true;
       },
     },
   });

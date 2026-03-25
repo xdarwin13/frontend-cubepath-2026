@@ -9,6 +9,50 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 
+function extractYouTubeVideoId(url: string): string | null {
+  try {
+    const normalizedUrl = url.startsWith('//') ? `https:${url}` : url;
+    const parsed = new URL(normalizedUrl);
+    const hostname = parsed.hostname.replace(/^www\./, '');
+
+    if (hostname === 'youtu.be') {
+      const id = parsed.pathname.slice(1);
+      return id || null;
+    }
+
+    if (
+      hostname === 'youtube.com' ||
+      hostname === 'm.youtube.com' ||
+      hostname === 'music.youtube.com' ||
+      hostname === 'youtube-nocookie.com'
+    ) {
+      if (parsed.pathname === '/watch') {
+        return parsed.searchParams.get('v');
+      }
+
+      const pathSegments = parsed.pathname.split('/').filter(Boolean);
+      if (pathSegments[0] === 'shorts' || pathSegments[0] === 'embed') {
+        return pathSegments[1] || null;
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function getYouTubeEmbedUrl(url: string): string | null {
+  const videoId = extractYouTubeVideoId(url);
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+}
+
+const YOUTUBE_URL_RE = /(?:^|\n)(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?[^\s]+|youtu\.be\/[^\s]+))(?:\n|$)/g;
+
+function linkifyYouTubeUrls(md: string): string {
+  return md.replace(YOUTUBE_URL_RE, (_match, url) => `\n[${url}](${url})\n`);
+}
+
 export default function CourseViewPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { token } = useAuth();
@@ -296,7 +340,41 @@ export default function CourseViewPage({ params }: { params: Promise<{ id: strin
                     </div>
                   )}
                   <div className="markdown-content">
-                    <ReactMarkdown>{activeLesson.content}</ReactMarkdown>
+                    <ReactMarkdown
+                      components={{
+                        a: ({ href, children, ...props }) => {
+                          if (!href) return <>{children}</>;
+
+                          const youtubeEmbedUrl = getYouTubeEmbedUrl(href);
+                          if (youtubeEmbedUrl) {
+                            return (
+                              <iframe
+                                src={youtubeEmbedUrl}
+                                title="Video de YouTube"
+                                className="my-6 block w-full aspect-video overflow-hidden rounded-xl border border-slate-700/60 bg-black/40"
+                                loading="lazy"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerPolicy="strict-origin-when-cross-origin"
+                                allowFullScreen
+                              />
+                            );
+                          }
+
+                          return (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              {...props}
+                            >
+                              {children}
+                            </a>
+                          );
+                        },
+                      }}
+                    >
+                      {linkifyYouTubeUrls(activeLesson.content || '')}
+                    </ReactMarkdown>
                   </div>
 
                   {/* Quiz Section */}
