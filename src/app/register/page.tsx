@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import NextImage from 'next/image';
-import { BookOpen, Mail, Lock, User, ArrowRight, Loader2, GraduationCap } from 'lucide-react';
+import { BookOpen, Mail, Lock, User, ArrowRight, Loader2, GraduationCap, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { REGISTRATION_DISABLED } from '@/lib/config';
 import toast from 'react-hot-toast';
@@ -22,6 +22,7 @@ function RegisterForm() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState(preselectedRole);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,7 +159,14 @@ function RegisterForm() {
           <label className="block text-sm font-medium text-slate-300 mb-2">Contraseña</label>
           <div className="relative group">
             <Lock className="absolute z-10 left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none group-focus-within:text-[#38bdf8] transition-colors" />
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" placeholder="Mínimo 6 caracteres" required minLength={6} />
+            <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className="input-field pr-12" placeholder="Mínimo 6 caracteres" required minLength={6} />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute z-10 right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#38bdf8] transition-colors"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
         </motion.div>
 
