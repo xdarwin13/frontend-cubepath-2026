@@ -19,6 +19,7 @@ import {
   Zap,
   Globe,
   ChevronRight,
+  ChevronDown,
   Menu,
   X,
   Mail,
@@ -26,6 +27,15 @@ import {
   Twitter,
   Linkedin,
   Heart,
+  Quote,
+  Cpu,
+  BrainCircuit,
+  Camera,
+  AudioLines,
+  Lock,
+  HelpCircle,
+  Plus,
+  Minus,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { REGISTRATION_DISABLED } from '@/lib/config';
@@ -270,6 +280,43 @@ function StepCard({ item, index }: { item: any; index: number }) {
   );
 }
 
+/* ========== FAQ ITEM ========== */
+function FAQItem({ faq, index }: { faq: { question: string; answer: string }; index: number }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.08 }}
+      viewport={{ once: true }}
+      className="glass-card overflow-hidden"
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-6 text-left group"
+      >
+        <span className="text-white font-medium pr-4 group-hover:text-[#38bdf8] transition-colors">{faq.question}</span>
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+          className="shrink-0 w-8 h-8 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center"
+        >
+          <ChevronDown className="w-4 h-4 text-slate-400" />
+        </motion.div>
+      </button>
+      <motion.div
+        initial={false}
+        animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="overflow-hidden"
+      >
+        <p className="px-6 pb-6 text-slate-400 text-sm leading-relaxed">{faq.answer}</p>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 /* ========== DATA ========== */
 const stats = [
   { value: 'Automática', label: 'Estructuración Generativa', icon: Sparkles },
@@ -291,6 +338,66 @@ const steps = [
   { number: '01', title: 'Especificación de Prompt', description: 'Define el tema central utilizando una instrucción clara para nuestra Inteligencia Artificial.' },
   { number: '02', title: 'Síntesis Estructural', description: 'El motor inteligente de EduCube extrae el temario, imágenes, cuestionarios y contenido de manera autónoma.' },
   { number: '03', title: 'Despliegue Educativo', description: 'Tu curso se publica para que la comunidad interactúe con el entorno de aprendizaje al instante.' },
+];
+
+const testimonials = [
+  {
+    name: 'Prof. María García',
+    role: 'Docente de Biología',
+    quote: 'Creé un curso completo de biología molecular en menos de 10 minutos. La calidad del contenido generado es impresionante.',
+    avatar: 'MG',
+    gradient: 'from-[#38bdf8] to-[#06b6d4]',
+  },
+  {
+    name: 'Carlos Rodríguez',
+    role: 'Estudiante de Ingeniería',
+    quote: 'Las lecciones con audio narrado y cuestionarios interactivos hacen que estudiar sea mucho más dinámico y efectivo.',
+    avatar: 'CR',
+    gradient: 'from-[#818cf8] to-[#a78bfa]',
+  },
+  {
+    name: 'Dra. Ana López',
+    role: 'Coordinadora Académica',
+    quote: 'El panel de administración nos da visibilidad total sobre el uso de la plataforma. Es exactamente lo que necesitábamos.',
+    avatar: 'AL',
+    gradient: 'from-[#06b6d4] to-[#3b82f6]',
+  },
+];
+
+const techStack = [
+  { name: 'Generación de Texto', description: 'Modelos de lenguaje avanzados para estructurar contenido educativo coherente y pedagógico.', icon: BrainCircuit, color: '#38bdf8' },
+  { name: 'Text-to-Speech', description: 'Síntesis de voz natural para narrar cada lección con claridad y entonación humana.', icon: AudioLines, color: '#818cf8' },
+  { name: 'Imágenes con Pexels', description: 'Selección semántica automática de imágenes relevantes de alta calidad sin costo.', icon: Camera, color: '#06b6d4' },
+  { name: 'Motor de IA', description: 'Pipeline inteligente que orquesta múltiples modelos para generar cursos completos E2E.', icon: Cpu, color: '#a78bfa' },
+  { name: 'Seguridad Avanzada', description: 'Autenticación JWT con cifrado de grado empresarial para proteger todos los datos.', icon: Lock, color: '#3b82f6' },
+  { name: 'Cuestionarios con IA', description: 'Generación automática de evaluaciones calibradas al nivel del contenido del curso.', icon: Sparkles, color: '#f59e0b' },
+];
+
+const faqs = [
+  {
+    question: '¿Es realmente gratuito usar EduCubeIA?',
+    answer: 'Sí, la plataforma es completamente gratuita. Puedes crear cursos como profesor y acceder a todo el contenido como estudiante sin ningún costo.',
+  },
+  {
+    question: '¿Cuánto tiempo tarda en generarse un curso?',
+    answer: 'Un curso completo con texto, imágenes, audio narrado y cuestionarios se genera en aproximadamente 2-5 minutos dependiendo de la extensión del tema.',
+  },
+  {
+    question: '¿Puedo editar el contenido generado por IA?',
+    answer: 'Por supuesto. Los profesores tienen control total sobre el contenido generado y pueden modificar, agregar o eliminar cualquier sección antes de publicar.',
+  },
+  {
+    question: '¿Qué tipos de cursos puedo crear?',
+    answer: 'Puedes crear cursos sobre cualquier tema: ciencias, tecnología, idiomas, arte, historia, negocios y más. La IA se adapta a cualquier área del conocimiento.',
+  },
+  {
+    question: '¿Los certificados son verificables?',
+    answer: 'Sí. Cada certificado incluye un código único de verificación que puede ser validado por cualquier persona a través de nuestra plataforma.',
+  },
+  {
+    question: '¿Necesito conocimientos técnicos para usar la plataforma?',
+    answer: 'No. EduCubeIA está diseñada para ser intuitiva. Solo necesitas describir el tema de tu curso y la IA se encarga del resto.',
+  },
 ];
 
 /* ========== MAIN COMPONENT ========== */
@@ -356,8 +463,8 @@ export default function LandingPage() {
           </Link>
 
           <div className="hidden items-center gap-8 md:flex">
-            {['Características', 'Cómo Funciona', 'Perfiles'].map((item, i) => (
-              <a key={i} href={`#${['features', 'how-it-works', 'roles'][i]}`} className="text-sm font-medium text-slate-400 hover:text-white transition-colors relative group">
+            {['Características', 'Cómo Funciona', 'Perfiles', 'FAQ'].map((item, i) => (
+              <a key={i} href={`#${['features', 'how-it-works', 'roles', 'faq'][i]}`} className="text-sm font-medium text-slate-400 hover:text-white transition-colors relative group">
                 {item}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-[#38bdf8] to-[#818cf8] group-hover:w-full transition-all duration-300" />
               </a>
@@ -392,10 +499,10 @@ export default function LandingPage() {
             className="md:hidden px-6 pb-4 pt-2 border-t border-slate-800/50"
           >
             <div className="flex flex-col gap-3">
-              {['Características', 'Cómo Funciona', 'Perfiles'].map((item, i) => (
+              {['Características', 'Cómo Funciona', 'Perfiles', 'FAQ'].map((item, i) => (
                 <a
                   key={i}
-                  href={`#${['features', 'how-it-works', 'roles'][i]}`}
+                  href={`#${['features', 'how-it-works', 'roles', 'faq'][i]}`}
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-sm font-medium text-slate-400 hover:text-white transition-colors py-2"
                 >
@@ -676,6 +783,116 @@ export default function LandingPage() {
                 </motion.div>
               </Link>
             </motion.div>
+          </div>
+        </section>
+
+        {/* ========== TESTIMONIALS ========== */}
+        <section id="testimonials" className="py-24 border-b border-slate-800/30">
+          <AnimatedSection className="mb-16 text-center">
+            <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#f59e0b]/5 border border-[#f59e0b]/15 text-[#f59e0b] text-sm font-medium mb-6">
+              <Star className="w-4 h-4" />
+              Testimonios
+            </motion.div>
+            <h2 className="text-3xl font-bold sm:text-5xl text-white mb-4">
+              Lo que Dicen <span className="gradient-text">Nuestros Usuarios</span>
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+              Profesores y estudiantes ya están transformando su experiencia educativa con EduCubeIA.
+            </p>
+          </AnimatedSection>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {testimonials.map((t, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
+                viewport={{ once: true }}
+                whileHover={{ y: -6, transition: { duration: 0.3 } }}
+                className="glass-card p-8 flex flex-col h-full relative"
+              >
+                <Quote className="w-8 h-8 text-[#38bdf8]/15 absolute top-6 right-6" />
+                <p className="text-slate-300 text-sm leading-relaxed mb-6 flex-grow italic">&ldquo;{t.quote}&rdquo;</p>
+                <div className="flex items-center gap-3 pt-4 border-t border-slate-800/50">
+                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                    {t.avatar}
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-semibold">{t.name}</p>
+                    <p className="text-slate-500 text-xs">{t.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* ========== TECH STACK ========== */}
+        <section id="tech" className="py-24 border-b border-slate-800/30">
+          <AnimatedSection className="mb-16 text-center">
+            <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#06b6d4]/5 border border-[#06b6d4]/15 text-[#06b6d4] text-sm font-medium mb-6">
+              <Cpu className="w-4 h-4" />
+              Tecnología
+            </motion.div>
+            <h2 className="text-3xl font-bold sm:text-5xl text-white mb-4">
+              Impulsado por <span className="gradient-text">IA de Vanguardia</span>
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+              Un ecosistema de tecnologías inteligentes trabajando en conjunto para crear la mejor experiencia educativa.
+            </p>
+          </AnimatedSection>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {techStack.map((tech, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -6, transition: { duration: 0.3 } }}
+                className="glass-card p-6 group"
+              >
+                <div className="flex items-start gap-4">
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-500 group-hover:shadow-lg"
+                    style={{
+                      background: `${tech.color}10`,
+                      borderColor: `${tech.color}20`,
+                    }}
+                  >
+                    <tech.icon className="w-6 h-6 transition-colors duration-500" style={{ color: tech.color }} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold mb-1 group-hover:text-[#38bdf8] transition-colors">{tech.name}</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed">{tech.description}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* ========== FAQ ========== */}
+        <section id="faq" className="py-24 border-b border-slate-800/30">
+          <AnimatedSection className="mb-16 text-center">
+            <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#a78bfa]/5 border border-[#a78bfa]/15 text-[#a78bfa] text-sm font-medium mb-6">
+              <HelpCircle className="w-4 h-4" />
+              FAQ
+            </motion.div>
+            <h2 className="text-3xl font-bold sm:text-5xl text-white mb-4">
+              Preguntas <span className="gradient-text">Frecuentes</span>
+            </h2>
+            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
+              Todo lo que necesitas saber sobre EduCubeIA y cómo funciona.
+            </p>
+          </AnimatedSection>
+
+          <div className="max-w-3xl mx-auto space-y-3">
+            {faqs.map((faq, i) => (
+              <FAQItem key={i} faq={faq} index={i} />
+            ))}
           </div>
         </section>
 
