@@ -500,7 +500,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.8, x: 50 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="relative flex justify-center lg:justify-end z-10 lg:-mr-24 xl:-mr-32 mt-12 lg:mt-0"
+            className="hidden lg:relative lg:flex justify-center lg:justify-end z-10 lg:-mr-24 xl:-mr-32 mt-12 lg:mt-0"
           >
             <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[600px] lg:h-[600px] mx-auto">
               {/* Animated glow rings */}
