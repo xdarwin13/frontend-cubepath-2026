@@ -6,14 +6,60 @@ import { studentApi } from '@/lib/api';
 import DashboardLayout from '@/components/DashboardLayout';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { BookOpen, Search, Loader2, Users, Sparkles } from 'lucide-react';
+import { BookOpen, Search, Loader2, Users, Sparkles, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useOnboardingTour } from '@/lib/useOnboardingTour';
+
+const STUDENT_TOUR_STEPS = [
+  {
+    popover: {
+      title: '👋 ¡Bienvenido, Estudiante!',
+      description: '<p>Esta es tu plataforma de aprendizaje con cursos creados con <strong>inteligencia artificial</strong>.</p><p style="margin-top:8px;opacity:0.7;font-size:13px">Te mostraremos cómo sacarle el máximo provecho en menos de 1 minuto.</p>',
+    },
+  },
+  {
+    element: '#student-search',
+    popover: {
+      title: '🔍 Busca lo que te interesa',
+      description: '<p>Escribe cualquier tema y filtra los cursos disponibles al instante. Puedes buscar por <strong>título</strong> o <strong>descripción</strong>.</p>',
+      side: 'bottom' as const,
+    },
+  },
+  {
+    element: '#sidebar-main-section',
+    popover: {
+      title: '🧭 Tu menú de navegación',
+      description: '<ul style="margin:4px 0 0 16px;list-style:disc;opacity:0.85;font-size:13px"><li><strong>Mis Cursos</strong> — cursos en los que estás inscrito</li><li><strong>Explorar Cursos</strong> — descubre cursos nuevos</li></ul><p style="margin-top:8px;opacity:0.7;font-size:12px">En móvil, abre el menú con el ícono ☰</p>',
+      side: 'right' as const,
+    },
+  },
+  {
+    element: '#student-course-list',
+    popover: {
+      title: '📚 Catálogo de cursos',
+      description: '<p>Aquí verás todos los cursos disponibles. Haz clic en cualquiera para ver su contenido completo e <strong>inscribirte gratis</strong>.</p><p style="margin-top:8px;opacity:0.7;font-size:13px">Cada curso incluye módulos, lecciones y evaluaciones generadas con IA.</p>',
+      side: 'top' as const,
+    },
+  },
+  {
+    popover: {
+      title: '🎓 ¡A aprender!',
+      description: '<p>Explora el catálogo, inscríbete en los cursos que te interesen y <strong>avanza a tu ritmo</strong>.</p><p style="margin-top:10px;padding:8px 12px;background:rgba(6,182,212,0.08);border-radius:8px;border-left:3px solid #06b6d4;font-size:13px">💡 <strong>Tip:</strong> Al completar un curso recibirás un certificado verificable con código QR.</p>',
+    },
+  },
+];
 
 export default function StudentDashboard() {
   const { token } = useAuth();
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  const { startTour } = useOnboardingTour({
+    tourId: 'student_dashboard',
+    steps: STUDENT_TOUR_STEPS,
+    delay: 1200,
+  });
 
   useEffect(() => {
     if (token) loadCourses();
@@ -38,15 +84,25 @@ export default function StudentDashboard() {
   return (
     <DashboardLayout allowedRole="student">
       <div>
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Explorar Cursos</h1>
             <p className="text-slate-400 mt-1 text-sm sm:text-base">Descubre cursos creados con inteligencia artificial</p>
           </div>
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: 15 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => startTour()}
+            className="p-2.5 rounded-xl border border-slate-700/50 text-slate-400 hover:text-[#06b6d4] hover:border-[#06b6d4]/30 hover:bg-[#06b6d4]/5 transition-all"
+            title="Ver tour de ayuda"
+            id="help-tour-btn"
+          >
+            <HelpCircle className="w-5 h-5" />
+          </motion.button>
         </motion.div>
 
         {/* Search */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative mb-8">
+        <motion.div id="student-search" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative mb-8">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
           <input
             type="text"
@@ -72,7 +128,7 @@ export default function StudentDashboard() {
             <p className="text-slate-400">Los profesores están creando contenido. ¡Vuelve pronto!</p>
           </motion.div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div id="student-course-list" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((course, i) => (
               <motion.div
                 key={course.id}

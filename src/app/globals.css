@@ -572,3 +572,283 @@ button:disabled, [role="button"][aria-disabled="true"] {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* ========== DRIVER.JS ONBOARDING TOUR ========== */
+.driver-popover.educubeia-tour-popover {
+  background: linear-gradient(165deg, #141c2e 0%, #0f172a 50%, #0c1425 100%) !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(56, 189, 248, 0.12) !important;
+  border-radius: 20px !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.03),
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(56, 189, 248, 0.06) !important;
+  max-width: 400px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  animation: tourPopoverIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Accent bar at top */
+.driver-popover.educubeia-tour-popover::before {
+  content: '' !important;
+  display: block !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc) !important;
+  border-radius: 20px 20px 0 0 !important;
+}
+
+@keyframes tourPopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #f8fafc !important;
+  margin: 0 !important;
+  padding: 22px 24px 0 24px !important;
+  line-height: 1.4 !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-description {
+  color: #8b9dc3 !important;
+  font-size: 13.5px !important;
+  line-height: 1.7 !important;
+  margin: 0 !important;
+  padding: 10px 24px 0 24px !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-description strong {
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-description ul {
+  padding-left: 4px !important;
+  margin: 6px 0 !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-description li {
+  margin-bottom: 2px !important;
+}
+
+/* Footer */
+.driver-popover.educubeia-tour-popover .driver-popover-footer {
+  margin: 0 !important;
+  padding: 16px 24px 20px 24px !important;
+  border-top: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-top: 18px !important;
+  background: rgba(0, 0, 0, 0.15) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Progress as pill */
+.driver-popover.educubeia-tour-popover .driver-popover-progress-text {
+  color: #64748b !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  background: rgba(100, 116, 139, 0.1) !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-navigation-btns {
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex-grow: 0 !important;
+}
+
+/* Next / Done button */
+.driver-popover.educubeia-tour-popover button {
+  flex: none !important;
+  text-align: center !important;
+  background: linear-gradient(135deg, #38bdf8, #818cf8) !important;
+  color: #ffffff !important;
+  border: none !important;
+  text-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 8px 20px !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 2px 12px rgba(56, 189, 248, 0.25),
+    inset 0 1px 0 rgba(255,255,255,0.15) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+.driver-popover.educubeia-tour-popover button:hover {
+  box-shadow:
+    0 4px 20px rgba(56, 189, 248, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.15) !important;
+  transform: translateY(-1px) !important;
+  filter: brightness(1.1) !important;
+}
+
+.driver-popover.educubeia-tour-popover button:active {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+/* Previous button */
+.driver-popover.educubeia-tour-popover .driver-popover-prev-btn {
+  background: transparent !important;
+  color: #64748b !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 8px 14px !important;
+  font-weight: 500 !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-prev-btn:hover {
+  background: transparent !important;
+  color: #e2e8f0 !important;
+  transform: translateX(-2px) !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Close button */
+.driver-popover.educubeia-tour-popover .driver-popover-close-btn {
+  all: unset !important;
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  width: 26px !important;
+  height: 26px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  color: #475569 !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  box-shadow: none !important;
+  flex: none !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  opacity: 0.5 !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-close-btn:hover {
+  color: #e2e8f0 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Arrow */
+.driver-popover.educubeia-tour-popover .driver-popover-arrow {
+  border: 8px solid transparent !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: #141c2e !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: #141c2e !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: #141c2e !important;
+}
+
+.driver-popover.educubeia-tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: #141c2e !important;
+}
+
+/* Highlighted element */
+.driver-active-element {
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 767px) {
+  .driver-popover.educubeia-tour-popover {
+    max-width: calc(100vw - 32px) !important;
+    border-radius: 16px !important;
+    margin: 0 16px !important;
+  }
+
+  .driver-popover.educubeia-tour-popover::before {
+    border-radius: 16px 16px 0 0 !important;
+  }
+
+  .driver-popover.educubeia-tour-popover .driver-popover-title {
+    font-size: 16px !important;
+    padding: 18px 20px 0 20px !important;
+  }
+
+  .driver-popover.educubeia-tour-popover .driver-popover-description {
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+    padding: 8px 20px 0 20px !important;
+  }
+
+  .driver-popover.educubeia-tour-popover .driver-popover-footer {
+    padding: 14px 20px 16px 20px !important;
+  }
+
+  .driver-popover.educubeia-tour-popover button {
+    font-size: 13px !important;
+    padding: 9px 18px !important;
+  }
+
+  .driver-popover.educubeia-tour-popover .driver-popover-close-btn {
+    top: 14px !important;
+    right: 12px !important;
+    width: 30px !important;
+    height: 30px !important;
+    flex: none !important;
+  }
+
+  .driver-active-element {
+    border-radius: 10px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .driver-popover.educubeia-tour-popover .driver-popover-title {
+    font-size: 15px !important;
+    padding: 16px 16px 0 16px !important;
+  }
+
+  .driver-popover.educubeia-tour-popover .driver-popover-description {
+    font-size: 12.5px !important;
+    padding: 6px 16px 0 16px !important;
+  }
+
+  .driver-popover.educubeia-tour-popover .driver-popover-footer {
+    padding: 12px 16px 14px 16px !important;
+  }
+
+  .driver-popover.educubeia-tour-popover button {
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+}
+

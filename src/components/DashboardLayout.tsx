@@ -115,7 +115,7 @@ export default function DashboardLayout({ children, allowedRole }: { children: R
       {/* Sidebar */}
       <aside className={`w-72 glass-strong fixed h-full flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Logo + close button */}
-        <div className="p-6">
+        <div id="sidebar-main-section" className="p-6">
           <div className="flex items-center justify-between mb-8">
             <Link href="/" className="flex items-center gap-0.5 group">
               <motion.div
@@ -143,6 +143,7 @@ export default function DashboardLayout({ children, allowedRole }: { children: R
 
           {/* User card */}
           <motion.div
+            id="sidebar-user-card"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
@@ -159,7 +160,7 @@ export default function DashboardLayout({ children, allowedRole }: { children: R
           </motion.div>
 
           {/* Navigation */}
-          <nav className="space-y-1">
+          <nav id="sidebar-nav" className="space-y-1">
             {config.navItems.map((item, i) => {
               const active = isActive(item.href);
               return (
